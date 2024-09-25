@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "857412161759",
+    "project_id": "fitnessworkoutapp-601c0",
+    "storage_bucket": "fitnessworkoutapp-601c0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:857412161759:android:e3f62b788ba78c8e36596a",
+        "android_client_info": {
+          "package_name": "com.example.fitness_workout_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABvXtc7ccj6zIaYgm2XZ-UFI3MPDt-T5o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
