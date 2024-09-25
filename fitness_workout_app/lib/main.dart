@@ -15,9 +15,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
-  await FirebaseAppCheck.instance.activate(
-    androidProvider: AndroidProvider.debug, // Sử dụng token mặc định trên Android
-  );
 
   runApp(const MyApp());
 }
@@ -41,8 +38,7 @@ class MyApp extends StatelessWidget {
         '/start': (context) => const StartedView(),
         '/login': (context) => const LoginView(),
         '/signup': (context) => const SignUpView(),
-        '/home': (context) => const HomeView(),
-        '/main': (context) => const MainTabView(), // Màn hình chính có tab
+        '/main_home': (context) => const MainTabView(), // Màn hình chính có tab
         '/completeProfile': (context) => const CompleteProfileView(),
 
       },

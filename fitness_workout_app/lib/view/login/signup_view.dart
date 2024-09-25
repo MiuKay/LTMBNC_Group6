@@ -53,25 +53,7 @@ class _SignUpViewState extends State<SignUpView> {
     );
   }
 }
-/*
-  void handleSignup() async {
-    User? user = await _authService.signup(
-      emailController.text.trim(),
-      passwordController.text.trim(),
-    );
 
-    if (user == null) {
-      // Nếu có lỗi, hiện thông báo
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng ký thất bại, kiểm tra thông tin!')),
-      );
-    } else {
-      // Đăng ký thành công, chuyển trang
-      Navigator.pushReplacementNamed(context, '/completeProfile');
-    }
-  }
-
-  */
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
