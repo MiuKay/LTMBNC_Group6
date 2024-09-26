@@ -1,3 +1,5 @@
+import 'package:fitness_workout_app/view/login/login_view.dart';
+import 'package:fitness_workout_app/view/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
@@ -5,6 +7,7 @@ import '../../common_widget/round_button.dart';
 import '../../common_widget/setting_row.dart';
 import '../../common_widget/title_subtitle_cell.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:fitness_workout_app/services/auth.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -16,25 +19,32 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   bool positive = false;
 
+
+
   List accountArr = [
-    {"image": "assets/img/p_personal.png", "name": "Personal Data", "tag": "1"},
-    {"image": "assets/img/p_achi.png", "name": "Achievement", "tag": "2"},
     {
       "image": "assets/img/p_activity.png",
       "name": "Activity History",
-      "tag": "3"
+      "tag": "1"
     },
     {
       "image": "assets/img/p_workout.png",
       "name": "Workout Progress",
-      "tag": "4"
+      "tag": "2"
     }
   ];
 
+  List settingArr = [
+    {"image": "assets/img/p_contact.png", "name": "Language", "tag": "3"},
+  ];
+
   List otherArr = [
-    {"image": "assets/img/p_contact.png", "name": "Contact Us", "tag": "5"},
-    {"image": "assets/img/p_privacy.png", "name": "Privacy Policy", "tag": "6"},
-    {"image": "assets/img/p_setting.png", "name": "Setting", "tag": "7"},
+    {"image": "assets/img/p_contact.png", "name": "Contact Us", "tag": "4"},
+    {"image": "assets/img/p_privacy.png", "name": "Privacy Policy", "tag": "5"},
+
+  ];
+  List outArr = [
+    {"image": "assets/img/p_setting.png", "name": "Logout", "tag": "6"},
   ];
   @override
   Widget build(BuildContext context) {
@@ -96,7 +106,7 @@ class _ProfileViewState extends State<ProfileView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Stefani Wong",
+                          "Vinh Tran",
                           style: TextStyle(
                             color: TColor.black,
                             fontSize: 14,
@@ -122,12 +132,10 @@ class _ProfileViewState extends State<ProfileView> {
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       onPressed: () {
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => const ActivityTrackerView(),
-                        //   ),
-                        // );
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const EditProfileView()));
                       },
                     ),
                   )
@@ -222,7 +230,7 @@ class _ProfileViewState extends State<ProfileView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Notification",
+                      "Setting",
                       style: TextStyle(
                         color: TColor.black,
                         fontSize: 16,
@@ -307,8 +315,104 @@ class _ProfileViewState extends State<ProfileView> {
                               },
                             ),
                           ]),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      height: 30,
+                      child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Image.asset("assets/img/p_notification.png",
+                                height: 15, width: 15, fit: BoxFit.contain),
+                            const SizedBox(
+                              width: 15,
+                            ),
+                            Expanded(
+                              child: Text(
+                                "Dark Mode",
+                                style: TextStyle(
+                                  color: TColor.black,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                            CustomAnimatedToggleSwitch<bool>(
+                              current: positive,
+                              values: [false, true],
+
+                              indicatorSize: Size.square(30.0),
+                              animationDuration:
+                              const Duration(milliseconds: 200),
+                              animationCurve: Curves.linear,
+                              onChanged: (b) => setState(() => positive = b),
+                              iconBuilder: (context, local, global) {
+                                return const SizedBox();
+                              },
+                              iconsTappable: false,
+                              wrapperBuilder: (context, global, child) {
+                                return Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Positioned(
+                                        left: 10.0,
+                                        right: 10.0,
+
+                                        height: 30.0,
+                                        child: DecoratedBox(
+                                          decoration: BoxDecoration(
+                                            gradient: LinearGradient(
+                                                colors: TColor.secondaryG),
+                                            borderRadius:
+                                            const BorderRadius.all(
+                                                Radius.circular(50.0)),
+                                          ),
+                                        )),
+                                    child,
+                                  ],
+                                );
+                              },
+                              foregroundIndicatorBuilder: (context, global) {
+                                return SizedBox.fromSize(
+                                  size: const Size(10, 10),
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: TColor.white,
+                                      borderRadius: const BorderRadius.all(
+                                          Radius.circular(50.0)),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                            color: Colors.black38,
+                                            spreadRadius: 0.05,
+                                            blurRadius: 1.1,
+                                            offset: Offset(0.0, 0.8))
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ]),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: settingArr.length,
+                      itemBuilder: (context, index) {
+                        var iObj = settingArr[index] as Map? ?? {};
+                        return SettingRow(
+                          icon: iObj["image"].toString(),
+                          title: iObj["name"].toString(),
+                          onPressed: () {},
+                        );
+                      },
                     )
                   ],
+
                 ),
               ),
               const SizedBox(
@@ -347,7 +451,29 @@ class _ProfileViewState extends State<ProfileView> {
                         return SettingRow(
                           icon: iObj["image"].toString(),
                           title: iObj["name"].toString(),
-                          onPressed: () {},
+                          onPressed: AuthService().logOut,
+                        );
+                      },
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: outArr.length,
+                      itemBuilder: (context, index) {
+                        var iObj = outArr[index] as Map? ?? {};
+                        return SettingRow(
+                          icon: iObj["image"].toString(),
+                          title: iObj["name"].toString(),
+                          onPressed:() {
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                        builder: (context) => const LoginView()));
+                        },
                         );
                       },
                     )

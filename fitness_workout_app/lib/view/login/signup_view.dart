@@ -4,6 +4,7 @@ import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:fitness_workout_app/common_widget/round_textfield.dart';
 import 'package:fitness_workout_app/view/login/complete_profile_view.dart';
 import 'package:fitness_workout_app/view/login/login_view.dart';
+import 'package:fitness_workout_app/view/login/welcome_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/services/auth.dart';
 
@@ -41,7 +42,11 @@ class _SignUpViewState extends State<SignUpView> {
     );
     
     if (res == "success") {
-      Navigator.pushReplacementNamed(context, '/completeProfile');
+      //Navigator.pushReplacementNamed(context, '/completeProfile');
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const WelcomeView()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: $res')),
