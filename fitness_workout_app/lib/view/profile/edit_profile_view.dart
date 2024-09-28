@@ -66,6 +66,18 @@ class _EditProfileViewState extends State<EditProfileView> {
                 SizedBox(
                   height: media.width * 0.05,
                 ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(media.width * 0.2),
+                  child: Image.asset(
+                    "assets/img/u2.png",
+                    width: media.width * 0.35,
+                    height: media.width * 0.35,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                SizedBox(
+                  height: media.width * 0.05,
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: Column(
@@ -210,7 +222,19 @@ class _EditProfileViewState extends State<EditProfileView> {
                         ],
                       ),
                       SizedBox(
-                        height: media.width * 0.08,
+                        height: media.width * 0.06,
+                      ),
+                      RoundButton(
+                          title: "Upload your image",
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                    const WhatYourGoalView()));
+                          }),
+                      SizedBox(
+                        height: media.width * 0.04,
                       ),
                       RoundButton(
                           title: "Save",
@@ -222,7 +246,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                                     const WhatYourGoalView()));
                           }),
                       SizedBox(
-                        height: media.width * 0.08,
+                        height: media.width * 0.04,
                       ),
                       RoundButton(
                           title: "Change Password",

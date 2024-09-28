@@ -4,6 +4,7 @@ import 'package:fitness_workout_app/view/on_boarding/started_view.dart';
 import 'package:fitness_workout_app/view/login/login_view.dart';
 import 'package:fitness_workout_app/view/login/signup_view.dart';
 import 'package:fitness_workout_app/view/home/home_view.dart';
+import 'package:fitness_workout_app/view/profile/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fitness_workout_app/view/login/complete_profile_view.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
         fontFamily: "Poppins",
       ),
       // Thiết lập route mặc định
-      initialRoute: '/start', // Trang khởi đầu là trang StartedView
+      initialRoute: '/main_home', // Trang khởi đầu là trang StartedView
       // Cấu hình các routes
       routes: {
         '/start': (context) => const StartedView(),
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => const SignUpView(),
         '/main_home': (context) => const MainTabView(), // Màn hình chính có tab
         '/completeProfile': (context) => const CompleteProfileView(),
+        '/profile': (context) => const ProfileView(),
 
       },
     );
