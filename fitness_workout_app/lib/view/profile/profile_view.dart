@@ -113,13 +113,6 @@ class _ProfileViewState extends State<ProfileView> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Text(
-                          "Lose a Fat Program",
-                          style: TextStyle(
-                            color: TColor.gray,
-                            fontSize: 12,
-                          ),
-                        )
                       ],
                     ),
                   ),
@@ -198,19 +191,21 @@ class _ProfileViewState extends State<ProfileView> {
                     const SizedBox(
                       height: 8,
                     ),
-                    ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: accountArr.length,
-                      itemBuilder: (context, index) {
-                        var iObj = accountArr[index] as Map? ?? {};
-                        return SettingRow(
-                          icon: iObj["image"].toString(),
-                          title: iObj["name"].toString(),
-                          onPressed: () {},
-                        );
+                    SettingRow(
+                      icon: "assets/img/p_activity.png",
+                      title: "Activity History",
+                      onPressed: () {
+                        // xử lý sự kiện khi ấn vào "Activity History"
                       },
-                    )
+                    ),
+                    const SizedBox(height: 8),
+                    SettingRow(
+                      icon: "assets/img/p_workout.png",
+                      title: "Workout Progress",
+                      onPressed: () {
+                        // xử lý sự kiện khi ấn vào "Workout Progress"
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -324,7 +319,7 @@ class _ProfileViewState extends State<ProfileView> {
                       child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Image.asset("assets/img/p_notification.png",
+                            Image.asset("assets/img/night_mode.png",
                                 height: 15, width: 15, fit: BoxFit.contain),
                             const SizedBox(
                               width: 15,
@@ -398,19 +393,13 @@ class _ProfileViewState extends State<ProfileView> {
                     const SizedBox(
                       height: 8,
                     ),
-                    ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: settingArr.length,
-                      itemBuilder: (context, index) {
-                        var iObj = settingArr[index] as Map? ?? {};
-                        return SettingRow(
-                          icon: iObj["image"].toString(),
-                          title: iObj["name"].toString(),
-                          onPressed: () {},
-                        );
+                    SettingRow(
+                      icon: "assets/img/p_contact.png",
+                      title: "Language",
+                      onPressed: () {
+                        // xử lý sự kiện khi ấn vào "Activity History"
                       },
-                    )
+                    ),
                   ],
 
                 ),
@@ -441,42 +430,31 @@ class _ProfileViewState extends State<ProfileView> {
                     const SizedBox(
                       height: 8,
                     ),
-                    ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: otherArr.length,
-                      itemBuilder: (context, index) {
-                        var iObj = otherArr[index] as Map? ?? {};
-                        return SettingRow(
-                          icon: iObj["image"].toString(),
-                          title: iObj["name"].toString(),
-                          onPressed: AuthService().logOut,
-                        );
+                    SettingRow(
+                      icon: "assets/img/p_contact.png",
+                      title: "Contact Us",
+                      onPressed: () {
+                        // xử lý sự kiện khi ấn vào
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    SettingRow(
+                      icon: "assets/img/p_privacy.png",
+                      title: "Privacy Policy",
+                      onPressed: () {
+                        // xử lý sự kiện khi ấn
                       },
                     ),
                     const SizedBox(
-                      height: 5,
+                      height: 8,
                     ),
-                    ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: outArr.length,
-                      itemBuilder: (context, index) {
-                        var iObj = outArr[index] as Map? ?? {};
-                        return SettingRow(
-                          icon: iObj["image"].toString(),
-                          title: iObj["name"].toString(),
-                          onPressed:() {
-                        Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                        builder: (context) => const LoginView()));
-                        },
-                        );
+                    SettingRow(
+                      icon: "assets/img/logout.png",
+                      title: "Logout",
+                      onPressed: () {
+                        // xử lý sự kiện khi ấn
                       },
-                    )
+                    ),
                   ],
                 ),
               )
