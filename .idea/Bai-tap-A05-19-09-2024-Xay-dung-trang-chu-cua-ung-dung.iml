@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/dev_lib/calendar_agenda/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/dev_lib/calendar_agenda/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/dev_lib/calendar_agenda/build" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/dev_lib/calendar_agenda/example/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/dev_lib/calendar_agenda/example/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/fitness_workout_app/dev_lib/calendar_agenda/example/build" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
