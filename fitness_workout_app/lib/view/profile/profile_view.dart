@@ -8,9 +8,12 @@ import '../../common_widget/setting_row.dart';
 import '../../common_widget/title_subtitle_cell.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:fitness_workout_app/services/auth.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 
 class ProfileView extends StatefulWidget {
-  const ProfileView({super.key});
+  final UserModel user;
+
+  const ProfileView({super.key, required this.user});
 
   @override
   State<ProfileView> createState() => _ProfileViewState();
@@ -106,7 +109,7 @@ class _ProfileViewState extends State<ProfileView> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Vinh Tran",
+                          "${widget.user.fname} ${widget.user.lname}",
                           style: TextStyle(
                             color: TColor.black,
                             fontSize: 14,
@@ -266,7 +269,7 @@ class _ProfileViewState extends State<ProfileView> {
                               iconBuilder: (context, local, global) {
                                 return const SizedBox();
                               },
-                              iconsTappable: false,
+                              iconsTappable: true,
                               wrapperBuilder: (context, global, child) {
                                 return Stack(
                                   alignment: Alignment.center,
@@ -345,7 +348,7 @@ class _ProfileViewState extends State<ProfileView> {
                               iconBuilder: (context, local, global) {
                                 return const SizedBox();
                               },
-                              iconsTappable: false,
+                              iconsTappable: true,
                               wrapperBuilder: (context, global, child) {
                                 return Stack(
                                   alignment: Alignment.center,
@@ -394,7 +397,7 @@ class _ProfileViewState extends State<ProfileView> {
                       height: 8,
                     ),
                     SettingRow(
-                      icon: "assets/img/p_contact.png",
+                      icon: "assets/img/language.png",
                       title: "Language",
                       onPressed: () {
                         // xử lý sự kiện khi ấn vào "Activity History"

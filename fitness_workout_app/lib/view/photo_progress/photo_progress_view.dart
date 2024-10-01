@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import 'comparison_view.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 
 class PhotoProgressView extends StatefulWidget {
-  const PhotoProgressView({super.key});
+  final UserModel user;
+
+  const PhotoProgressView({super.key, required this.user});
 
   @override
   State<PhotoProgressView> createState() => _PhotoProgressViewState();

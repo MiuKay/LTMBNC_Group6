@@ -1,19 +1,62 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
+import '../../common_widget/selectDate.dart';
+import '../../services/auth.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 
 class CompleteProfileView extends StatefulWidget {
-  const CompleteProfileView({super.key});
+  final UserModel user;
+
+  const CompleteProfileView({super.key, required this.user});
 
   @override
   State<CompleteProfileView> createState() => _CompleteProfileViewState();
 }
 
 class _CompleteProfileViewState extends State<CompleteProfileView> {
-  TextEditingController txtDate = TextEditingController();
+  TextEditingController selectDate = TextEditingController();
+  TextEditingController selectedGender = TextEditingController();
+  TextEditingController selectWeight = TextEditingController();
+  TextEditingController selectHeight = TextEditingController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    selectDate.dispose();
+    selectedGender.dispose();
+    selectWeight.dispose();
+    selectHeight.dispose();
+  }
+
+  void completeUserProfile() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+
+    String res = await AuthService().completeUserProfile(
+      uid: uid,
+      dateOfBirth: selectDate.text,
+      gender: selectedGender.text,
+      weight: selectWeight.text,
+      height: selectHeight.text,
+    );
+
+    if (res == "success") {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WhatYourGoalView(user: widget.user),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res)),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,56 +102,74 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                         child: Row(
                           children: [
                             Container(
-                                alignment: Alignment.center,
-                                width: 50,
-                                height: 50,
-                                padding: const EdgeInsets.symmetric(horizontal: 15),
-
-                                child: Image.asset(
-                                  "assets/img/gender.png",
-                                  width: 20,
-                                  height: 20,
-                                  fit: BoxFit.contain,
-                                  color: TColor.gray,
-                                )),
+                              alignment: Alignment.center,
+                              width: 50,
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              child: Image.asset(
+                                "assets/img/gender.png",
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.contain,
+                                color: TColor.gray,
+                              ),
+                            ),
 
                             Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  items: ["Male", "Female"]
-                                      .map((name) => DropdownMenuItem(
-                                    value: name,
-                                    child: Text(
-                                      name,
-                                      style: TextStyle(
-                                          color: TColor.gray,
-                                          fontSize: 14),
-                                    ),
-                                  ))
-                                      .toList(),
-                                  onChanged: (value) {},
-                                  isExpanded: true,
-                                  hint: Text(
-                                    "Choose Gender",
-                                    style: TextStyle(
-                                        color: TColor.gray, fontSize: 12),
-                                  ),
+                              child: TextField(
+                                controller: selectedGender,
+                                readOnly: true,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: TColor.black,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: "Choose Gender",
+                                  hintStyle: TextStyle(color: TColor.gray, fontSize: 12),
+                                  border: InputBorder.none,
                                 ),
                               ),
                             ),
 
-                            const SizedBox(width: 8,)
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                items: ["Male", "Female"]
+                                    .map((name) => DropdownMenuItem(
+                                  value: name,
+                                  child: Text(
+                                    name,
+                                    style: TextStyle(color: TColor.gray, fontSize: 14),
+                                  ),
+                                )).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedGender.text = value.toString();
+                                  });
+                                },
+                                icon: Icon(Icons.arrow_drop_down, color: TColor.gray),
+                                isExpanded: false,
+                              ),
+                            ),
 
+                            const SizedBox(width: 8),
                           ],
                         ),),
                       SizedBox(
                         height: media.width * 0.04,
                       ),
-                      RoundTextField(
-                        controller: txtDate,
-                        hitText: "Date of Birth",
-                        icon: "assets/img/date.png",
+                      InkWell(
+                        onTap: () {
+                          DatePickerHelper.selectDate(context, selectDate);
+                        },
+                        child: IgnorePointer(
+                          child: RoundTextField(
+                            controller: selectDate,
+                            hitText: "Date of Birth",
+                            icon: "assets/img/date.png",
+                          ),
+                        ),
                       ),
+
                       SizedBox(
                         height: media.width * 0.04,
                       ),
@@ -116,7 +177,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                         children: [
                           Expanded(
                             child: RoundTextField(
-                              controller: txtDate,
+                              controller: selectWeight,
                               hitText: "Your Weight",
                               icon: "assets/img/weight.png",
                             ),
@@ -149,7 +210,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                         children: [
                           Expanded(
                             child: RoundTextField(
-                              controller: txtDate,
+                              controller: selectHeight,
                               hitText: "Your Height",
                               icon: "assets/img/hight.png",
                             ),
@@ -180,13 +241,8 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
                       ),
                       RoundButton(
                           title: "Next >",
-                          onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                    const WhatYourGoalView()));
-                          }),
+                          onPressed: completeUserProfile,
+                          ),
                     ],
                   ),
                 ),

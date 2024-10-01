@@ -3,6 +3,7 @@ import 'package:fitness_workout_app/common_widget/tab_button.dart';
 import 'package:fitness_workout_app/view/home/blank_view.dart';
 import 'package:fitness_workout_app/view/main_tab/select_view.dart';
 import 'package:flutter/material.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 
 import '../home/home_view.dart';
 import '../photo_progress/photo_progress_view.dart';
@@ -10,7 +11,8 @@ import '../profile/profile_view.dart';
 import '../workout_tracker/workout_tracker_view.dart';
 
 class MainTabView extends StatefulWidget {
-  const MainTabView({super.key});
+  final UserModel user;
+  const MainTabView({super.key, required this.user});
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
@@ -19,7 +21,13 @@ class MainTabView extends StatefulWidget {
 class _MainTabViewState extends State<MainTabView> {
   int selectTab = 0;
   final PageStorageBucket pageBucket = PageStorageBucket();
-  Widget currentTab = const HomeView();
+  late Widget currentTab;
+
+  @override
+  void initState() {
+    super.initState();
+    currentTab = HomeView(user: widget.user);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +71,7 @@ class _MainTabViewState extends State<MainTabView> {
                     isActive: selectTab == 0,
                     onTap: () {
                       selectTab = 0;
-                      currentTab = const HomeView();
+                      currentTab = HomeView(user: widget.user);
                       if (mounted) {
                         setState(() {});
                       }
@@ -87,7 +95,7 @@ class _MainTabViewState extends State<MainTabView> {
                     isActive: selectTab == 2,
                     onTap: () {
                       selectTab = 2;
-                      currentTab = const PhotoProgressView();
+                      currentTab = PhotoProgressView(user: widget.user);
                       if (mounted) {
                         setState(() {});
                       }
@@ -98,7 +106,7 @@ class _MainTabViewState extends State<MainTabView> {
                     isActive: selectTab == 3,
                     onTap: () {
                       selectTab = 3;
-                      currentTab = const ProfileView();
+                      currentTab = ProfileView(user: widget.user);
                       if (mounted) {
                         setState(() {});
                       }

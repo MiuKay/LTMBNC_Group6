@@ -7,6 +7,7 @@ import 'package:fitness_workout_app/view/login/login_view.dart';
 import 'package:fitness_workout_app/view/login/welcome_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/services/auth.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 
 class SignUpView extends StatefulWidget {
   const SignUpView({super.key});
@@ -16,10 +17,10 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
-  final TextEditingController fnameController = TextEditingController();
-  final TextEditingController lnameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController fnameController = TextEditingController();
+  final TextEditingController lnameController = TextEditingController();
   bool isCheck = false;
 
   @override
@@ -32,32 +33,40 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   void handleSignup() async {
-  try {
-    // Gọi hàm đăng ký và chờ kết quả
-    String res = await AuthService().signupUser(
+    try {
+      // Gọi hàm đăng ký và chờ kết quả
+      String res = await AuthService().signupUser(
         email: emailController.text,
         password: passwordController.text,
         fname: fnameController.text,
         lname: lnameController.text,
-    );
-    
-    if (res == "success") {
-      //Navigator.pushReplacementNamed(context, '/completeProfile');
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => const WelcomeView()));
-    } else {
+      );
+
+      if (res == "success") {
+        // Lấy thông tin người dùng
+        UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+
+        if (user != null) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CompleteProfileView(user: user),
+            ),
+          );
+        }
+      } else {
+        // Hiển thị thông báo lỗi nếu không thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res)), // Hiển thị thông báo lỗi từ signupUser
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: $res')),
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Lỗi xảy ra: $e')),
-    );
   }
-}
+
 
   @override
   Widget build(BuildContext context) {

@@ -7,6 +7,9 @@ import 'package:fitness_workout_app/view/login/reset_password_view.dart';
 import 'package:fitness_workout_app/view/login/signup_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/services/auth.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
+
+import '../main_tab/main_tab_view.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -39,10 +42,18 @@ class _LoginViewState extends State<LoginView> {
       );
 
       if (res == "success") {
-        setState(() {
-          isCheck = false;
-        });
-        Navigator.pushReplacementNamed(context, '/main_home');
+        // Lấy thông tin người dùng
+        UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+
+        if (user != null) {
+          // Điều hướng đến HomeView với user
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainTabView(user: user), // Truyền user vào HomeView
+            ),
+          );
+        }
       } else {
         setState(() {
           isCheck = false;

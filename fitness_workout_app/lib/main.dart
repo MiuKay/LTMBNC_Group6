@@ -31,15 +31,12 @@ class MyApp extends StatelessWidget {
         fontFamily: "Poppins",
       ),
       // Thiết lập route mặc định
-      initialRoute: '/main_home', // Trang khởi đầu là trang StartedView
+      initialRoute: '/start',
       // Cấu hình các routes
       routes: {
         '/start': (context) => const StartedView(),
         '/login': (context) => const LoginView(),
         '/signup': (context) => const SignUpView(),
-        '/main_home': (context) => const MainTabView(), // Màn hình chính có tab
-        '/completeProfile': (context) => const CompleteProfileView(),
-        '/profile': (context) => const ProfileView(),
 
       },
     );

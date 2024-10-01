@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import '../main_tab/main_tab_view.dart';
+import 'package:fitness_workout_app/model/user_model.dart';
 
 class WelcomeView extends StatefulWidget {
-  const WelcomeView({super.key});
+  final UserModel user;
+
+  const WelcomeView({super.key, required this.user});
 
   @override
   State<WelcomeView> createState() => _WelcomeViewState();
@@ -57,7 +60,7 @@ class _WelcomeViewState extends State<WelcomeView> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const MainTabView()));
+                            builder: (context) => MainTabView(user: widget.user)));
                   }),
 
             ],

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
+import '../../common_widget/selectDate.dart';
 
 class EditProfileView extends StatefulWidget {
   const EditProfileView({super.key});
@@ -14,7 +15,10 @@ class EditProfileView extends StatefulWidget {
 }
 
 class _EditProfileViewState extends State<EditProfileView> {
-  TextEditingController txtDate = TextEditingController();
+  TextEditingController selectDate = TextEditingController();
+  TextEditingController selectedGender = TextEditingController();
+  TextEditingController selectWeight = TextEditingController();
+  TextEditingController selectHeight = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -105,56 +109,74 @@ class _EditProfileViewState extends State<EditProfileView> {
                         child: Row(
                           children: [
                             Container(
-                                alignment: Alignment.center,
-                                width: 50,
-                                height: 50,
-                                padding: const EdgeInsets.symmetric(horizontal: 15),
-
-                                child: Image.asset(
-                                  "assets/img/gender.png",
-                                  width: 20,
-                                  height: 20,
-                                  fit: BoxFit.contain,
-                                  color: TColor.gray,
-                                )),
+                              alignment: Alignment.center,
+                              width: 50,
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
+                              child: Image.asset(
+                                "assets/img/gender.png",
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.contain,
+                                color: TColor.gray,
+                              ),
+                            ),
 
                             Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton(
-                                  items: ["Male", "Female"]
-                                      .map((name) => DropdownMenuItem(
-                                    value: name,
-                                    child: Text(
-                                      name,
-                                      style: TextStyle(
-                                          color: TColor.gray,
-                                          fontSize: 14),
-                                    ),
-                                  ))
-                                      .toList(),
-                                  onChanged: (value) {},
-                                  isExpanded: true,
-                                  hint: Text(
-                                    "Choose Gender",
-                                    style: TextStyle(
-                                        color: TColor.gray, fontSize: 12),
-                                  ),
+                              child: TextField(
+                                controller: selectedGender,
+                                readOnly: true,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: TColor.black,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: "Choose Gender",
+                                  hintStyle: TextStyle(color: TColor.gray, fontSize: 12),
+                                  border: InputBorder.none,
                                 ),
                               ),
                             ),
 
-                            const SizedBox(width: 8,)
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                items: ["Male", "Female"]
+                                    .map((name) => DropdownMenuItem(
+                                  value: name,
+                                  child: Text(
+                                    name,
+                                    style: TextStyle(color: TColor.gray, fontSize: 14),
+                                  ),
+                                )).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedGender.text = value.toString(); // Update text when gender is selected
+                                  });
+                                },
+                                icon: Icon(Icons.arrow_drop_down, color: TColor.gray),
+                                isExpanded: false,
+                              ),
+                            ),
 
+                            const SizedBox(width: 8),
                           ],
                         ),),
                       SizedBox(
                         height: media.width * 0.04,
                       ),
-                      RoundTextField(
-                        controller: txtDate,
-                        hitText: "Date of Birth",
-                        icon: "assets/img/date.png",
+                      InkWell(
+                        onTap: () {
+                          DatePickerHelper.selectDate(context, selectDate);
+                        },
+                        child: IgnorePointer(
+                          child: RoundTextField(
+                            controller: selectDate,
+                            hitText: "Date of Birth",
+                            icon: "assets/img/date.png",
+                          ),
+                        ),
                       ),
+
                       SizedBox(
                         height: media.width * 0.04,
                       ),
@@ -162,7 +184,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                         children: [
                           Expanded(
                             child: RoundTextField(
-                              controller: txtDate,
+                              controller: selectWeight,
                               hitText: "Your Weight",
                               icon: "assets/img/weight.png",
                             ),
@@ -195,7 +217,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                         children: [
                           Expanded(
                             child: RoundTextField(
-                              controller: txtDate,
+                              controller: selectHeight,
                               hitText: "Your Height",
                               icon: "assets/img/hight.png",
                             ),
@@ -227,11 +249,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       RoundButton(
                           title: "Upload your image",
                           onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                    const WhatYourGoalView()));
+
                           }),
                       SizedBox(
                         height: media.width * 0.04,
@@ -239,11 +257,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                       RoundButton(
                           title: "Save",
                           onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                    const WhatYourGoalView()));
+
                           }),
                       SizedBox(
                         height: media.width * 0.04,
