@@ -152,5 +152,52 @@ class AuthService {
     return null;
   }
 
+  Future<void> updateUserProfileImage(String uid, String imageUrl) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'pic': imageUrl,
+      });
+    } catch (e) {
+      print('Error updating user profile image: $e');
+      throw e;
+    }
+  }
+
+  Future<String> updateUserProfile({
+    required String uid,
+    required String dateOfBirth,
+    required String gender,
+    required String weight,
+    required String height,
+    required String fname,
+    required String lname,
+  }) async {
+    String res = "Có lỗi gì đó xảy ra";
+
+    if (fname.isEmpty || lname.isEmpty || dateOfBirth.isEmpty || gender.isEmpty || weight.isEmpty || height.isEmpty) {
+      return "Vui lòng điền đầy đủ thông tin.";
+    }
+    if (double.tryParse(weight) == null || double.parse(weight) <= 30) {
+      return "Cân nặng phải là số và lớn hơn 30.";
+    }
+    if (double.tryParse(height) == null || double.parse(height) <= 50 || double.parse(height) >= 300) {
+      return "Chiều cao phải là số và lớn hơn 50 và nhỏ hơn 300.";
+    }
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'fname': fname,
+        'lname': lname,
+        'date_of_birth': dateOfBirth,
+        'gender': gender,
+        'weight': weight,
+        'height': height,
+      });
+      res = "success";
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
+  }
+
 }
 

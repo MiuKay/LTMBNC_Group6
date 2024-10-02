@@ -1,6 +1,5 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/common_widget/tab_button.dart';
-import 'package:fitness_workout_app/view/home/blank_view.dart';
 import 'package:fitness_workout_app/view/main_tab/select_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
@@ -8,11 +7,12 @@ import 'package:fitness_workout_app/model/user_model.dart';
 import '../home/home_view.dart';
 import '../photo_progress/photo_progress_view.dart';
 import '../profile/profile_view.dart';
-import '../workout_tracker/workout_tracker_view.dart';
+
 
 class MainTabView extends StatefulWidget {
   final UserModel user;
-  const MainTabView({super.key, required this.user});
+  final int initialTab;
+  const MainTabView({super.key, required this.user, this.initialTab = 0});
 
   @override
   State<MainTabView> createState() => _MainTabViewState();
@@ -26,8 +26,26 @@ class _MainTabViewState extends State<MainTabView> {
   @override
   void initState() {
     super.initState();
-    currentTab = HomeView(user: widget.user);
+    selectTab = widget.initialTab;
+    currentTab = _getTab(selectTab);
   }
+
+  // Hàm để lấy tab dựa vào index
+  Widget _getTab(int index) {
+    switch (index) {
+      case 0:
+        return HomeView(user: widget.user);
+      case 1:
+        return const SelectView();
+      case 2:
+        return PhotoProgressView(user: widget.user);
+      case 3:
+        return ProfileView(user: widget.user);
+      default:
+        return HomeView(user: widget.user);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,9 +68,11 @@ class _MainTabViewState extends State<MainTabView> {
                 boxShadow: const [
                   BoxShadow(
                     color: Colors.black12,
-                    blurRadius: 2,)
-                ]),
-            child: Icon(Icons.search,color: TColor.white, size: 35, ),
+                    blurRadius: 2,
+                  )
+                ]
+            ),
+            child: Icon(Icons.search, color: TColor.white, size: 35),
           ),
         ),
       ),
@@ -71,7 +91,7 @@ class _MainTabViewState extends State<MainTabView> {
                     isActive: selectTab == 0,
                     onTap: () {
                       selectTab = 0;
-                      currentTab = HomeView(user: widget.user);
+                      currentTab = _getTab(selectTab);
                       if (mounted) {
                         setState(() {});
                       }
@@ -82,20 +102,19 @@ class _MainTabViewState extends State<MainTabView> {
                     isActive: selectTab == 1,
                     onTap: () {
                       selectTab = 1;
-                      currentTab = const SelectView();
+                      currentTab = _getTab(selectTab);
                       if (mounted) {
                         setState(() {});
                       }
                     }),
-
-                const  SizedBox(width: 40,),
+                const SizedBox(width: 40,),
                 TabButton(
                     icon: "assets/img/camera_tab.png",
                     selectIcon: "assets/img/camera_tab_select.png",
                     isActive: selectTab == 2,
                     onTap: () {
                       selectTab = 2;
-                      currentTab = PhotoProgressView(user: widget.user);
+                      currentTab = _getTab(selectTab);
                       if (mounted) {
                         setState(() {});
                       }
@@ -106,14 +125,15 @@ class _MainTabViewState extends State<MainTabView> {
                     isActive: selectTab == 3,
                     onTap: () {
                       selectTab = 3;
-                      currentTab = ProfileView(user: widget.user);
+                      currentTab = _getTab(selectTab);
                       if (mounted) {
                         setState(() {});
                       }
                     })
               ],
             ),
-          )),
+          )
+      ),
     );
   }
 }

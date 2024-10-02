@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/view/login/login_view.dart';
 import 'package:fitness_workout_app/view/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +15,7 @@ import '../setting/PrivacyPolicy_and_TermOfUse_View.dart';
 
 class ProfileView extends StatefulWidget {
   final UserModel user;
-
   const ProfileView({super.key, required this.user});
-
   @override
   State<ProfileView> createState() => _ProfileViewState();
 }
@@ -100,7 +99,14 @@ class _ProfileViewState extends State<ProfileView> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(30),
-                    child: Image.asset(
+                    child: widget.user.pic.isNotEmpty
+                        ? Image.network(
+                      widget.user.pic,
+                      width: 50,
+                      height: 50,
+                      fit: BoxFit.cover,
+                    )
+                        : Image.asset(
                       "assets/img/u2.png",
                       width: 50,
                       height: 50,
@@ -118,7 +124,7 @@ class _ProfileViewState extends State<ProfileView> {
                           "${widget.user.fname} ${widget.user.lname}",
                           style: TextStyle(
                             color: TColor.black,
-                            fontSize: 14,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
