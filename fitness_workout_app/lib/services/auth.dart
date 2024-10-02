@@ -199,5 +199,13 @@ class AuthService {
     return res;
   }
 
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } catch (e) {
+      throw e;
+    }
+  }
+
 }
 
