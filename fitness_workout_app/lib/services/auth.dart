@@ -56,7 +56,6 @@ class AuthService {
     return res;
   }
 
-
   // logIn user
   Future<String> loginUser({
     required String email,

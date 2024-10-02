@@ -1,24 +1,48 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/view/login/reset_password_view.dart';
-import 'package:fitness_workout_app/view/login/what_your_goal_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
 import '../../common_widget/selectDate.dart';
+import '../../model/user_model.dart';
 
 class EditProfileView extends StatefulWidget {
-  const EditProfileView({super.key});
-
+  final UserModel user;
+  const EditProfileView({super.key, required this.user});
   @override
   State<EditProfileView> createState() => _EditProfileViewState();
 }
 
 class _EditProfileViewState extends State<EditProfileView> {
-  TextEditingController selectDate = TextEditingController();
-  TextEditingController selectedGender = TextEditingController();
-  TextEditingController selectWeight = TextEditingController();
-  TextEditingController selectHeight = TextEditingController();
+  final TextEditingController selectDate = TextEditingController();
+  final TextEditingController selectedGender = TextEditingController();
+  final TextEditingController selectWeight = TextEditingController();
+  final TextEditingController selectHeight = TextEditingController();
+  final TextEditingController fnameController = TextEditingController();
+  final TextEditingController lnameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    fnameController.text = widget.user.fname;
+    lnameController.text = widget.user.lname;
+    selectWeight.text = widget.user.weight;
+    selectHeight.text = widget.user.height;
+    selectDate.text = widget.user.dateOfBirth;
+    selectedGender.text = widget.user.gender;
+  }
+
+  @override
+  void dispose() {
+    fnameController.dispose();
+    lnameController.dispose();
+    selectWeight.dispose();
+    selectHeight.dispose();
+    selectDate.dispose();
+    selectedGender.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,18 +110,18 @@ class _EditProfileViewState extends State<EditProfileView> {
                   padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: Column(
                     children: [
-                      const RoundTextField(
+                      RoundTextField(
                         hitText: "First Name",
                         icon: "assets/img/user_text.png",
-                        //controller: fnameController,
+                        controller: fnameController,
                       ),
                       SizedBox(
                         height: media.width * 0.04,
                       ),
-                      const RoundTextField(
+                      RoundTextField(
                         hitText: "Last Name",
                         icon: "assets/img/user_text.png",
-                        //controller: lnameController,
+                        controller: lnameController,
                       ),
                       SizedBox(
                         height: media.width * 0.04,
@@ -150,7 +174,7 @@ class _EditProfileViewState extends State<EditProfileView> {
                                 )).toList(),
                                 onChanged: (value) {
                                   setState(() {
-                                    selectedGender.text = value.toString(); // Update text when gender is selected
+                                    selectedGender.text = value.toString();
                                   });
                                 },
                                 icon: Icon(Icons.arrow_drop_down, color: TColor.gray),

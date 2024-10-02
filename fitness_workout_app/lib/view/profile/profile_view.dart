@@ -7,8 +7,10 @@ import '../../common_widget/round_button.dart';
 import '../../common_widget/setting_row.dart';
 import '../../common_widget/title_subtitle_cell.dart';
 import 'package:animated_toggle_switch/animated_toggle_switch.dart';
-import 'package:fitness_workout_app/services/auth.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
+
+import '../../services/auth.dart';
+import '../setting/PrivacyPolicy_and_TermOfUse_View.dart';
 
 class ProfileView extends StatefulWidget {
   final UserModel user;
@@ -21,34 +23,38 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   bool positive = false;
+  bool darkmode = false;
 
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Xác nhận"),
+          content: Text("Bạn có chắc chắn muốn đăng xuất?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Không"),
+            ),
+            TextButton(
+              onPressed: () async {
+                await AuthService().logOut();
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const LoginView()));
+              },
+              child: Text("Có"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
-
-  List accountArr = [
-    {
-      "image": "assets/img/p_activity.png",
-      "name": "Activity History",
-      "tag": "1"
-    },
-    {
-      "image": "assets/img/p_workout.png",
-      "name": "Workout Progress",
-      "tag": "2"
-    }
-  ];
-
-  List settingArr = [
-    {"image": "assets/img/p_contact.png", "name": "Language", "tag": "3"},
-  ];
-
-  List otherArr = [
-    {"image": "assets/img/p_contact.png", "name": "Contact Us", "tag": "4"},
-    {"image": "assets/img/p_privacy.png", "name": "Privacy Policy", "tag": "5"},
-
-  ];
-  List outArr = [
-    {"image": "assets/img/p_setting.png", "name": "Logout", "tag": "6"},
-  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,7 +137,7 @@ class _ProfileViewState extends State<ProfileView> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const EditProfileView()));
+                                builder: (context) => EditProfileView(user: widget.user)));
                       },
                     ),
                   )
@@ -140,29 +146,29 @@ class _ProfileViewState extends State<ProfileView> {
               const SizedBox(
                 height: 15,
               ),
-              const Row(
+              Row(
                 children: [
                   Expanded(
                     child: TitleSubtitleCell(
-                      title: "180cm",
+                      title: "${widget.user.height}cm",
                       subtitle: "Height",
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 15,
                   ),
                   Expanded(
                     child: TitleSubtitleCell(
-                      title: "65kg",
+                      title: "${widget.user.weight}kg",
                       subtitle: "Weight",
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 15,
                   ),
                   Expanded(
                     child: TitleSubtitleCell(
-                      title: "22yo",
+                      title: "${widget.user.getAge()}yo",
                       subtitle: "Age",
                     ),
                   ),
@@ -282,7 +288,7 @@ class _ProfileViewState extends State<ProfileView> {
                                         child: DecoratedBox(
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
-                                                colors: TColor.secondaryG),
+                                                colors: TColor.thirdG),
                                             borderRadius:
                                             const BorderRadius.all(
                                                 Radius.circular(50.0)),
@@ -337,14 +343,14 @@ class _ProfileViewState extends State<ProfileView> {
                               ),
                             ),
                             CustomAnimatedToggleSwitch<bool>(
-                              current: positive,
+                              current: darkmode,
                               values: [false, true],
 
                               indicatorSize: Size.square(30.0),
                               animationDuration:
                               const Duration(milliseconds: 200),
                               animationCurve: Curves.linear,
-                              onChanged: (b) => setState(() => positive = b),
+                              onChanged: (b) => setState(() => darkmode = b),
                               iconBuilder: (context, local, global) {
                                 return const SizedBox();
                               },
@@ -361,7 +367,7 @@ class _ProfileViewState extends State<ProfileView> {
                                         child: DecoratedBox(
                                           decoration: BoxDecoration(
                                             gradient: LinearGradient(
-                                                colors: TColor.secondaryG),
+                                                colors: TColor.thirdG),
                                             borderRadius:
                                             const BorderRadius.all(
                                                 Radius.circular(50.0)),
@@ -445,7 +451,11 @@ class _ProfileViewState extends State<ProfileView> {
                       icon: "assets/img/p_privacy.png",
                       title: "Privacy Policy",
                       onPressed: () {
-                        // xử lý sự kiện khi ấn
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                  const PrivacyPolicyandTermOfUseView()));
                       },
                     ),
                     const SizedBox(
@@ -455,7 +465,7 @@ class _ProfileViewState extends State<ProfileView> {
                       icon: "assets/img/logout.png",
                       title: "Logout",
                       onPressed: () {
-                        // xử lý sự kiện khi ấn
+                        _showLogoutDialog(context);
                       },
                     ),
                   ],

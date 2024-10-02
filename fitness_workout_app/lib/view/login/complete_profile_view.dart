@@ -17,10 +17,10 @@ class CompleteProfileView extends StatefulWidget {
 }
 
 class _CompleteProfileViewState extends State<CompleteProfileView> {
-  TextEditingController selectDate = TextEditingController();
-  TextEditingController selectedGender = TextEditingController();
-  TextEditingController selectWeight = TextEditingController();
-  TextEditingController selectHeight = TextEditingController();
+  final TextEditingController selectDate = TextEditingController();
+  final TextEditingController selectedGender = TextEditingController();
+  final TextEditingController selectWeight = TextEditingController();
+  final TextEditingController selectHeight = TextEditingController();
 
   @override
   void dispose() {

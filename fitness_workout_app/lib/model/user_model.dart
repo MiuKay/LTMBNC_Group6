@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class UserModel {
   final String uid;
   final String fname;
@@ -21,6 +23,23 @@ class UserModel {
     required this.pic,
   });
 
+  // Tính tuổi người dùng từ ngày sinh
+  int getAge() {
+    // Sử dụng DateFormat để parse chuỗi ngày tháng
+    DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+    DateTime dob = dateFormat.parse(dateOfBirth);
+    DateTime today = DateTime.now();
+
+    int age = today.year - dob.year;
+
+    // Nếu chưa đến ngày sinh nhật trong năm nay, thì trừ 1 tuổi
+    if (today.month < dob.month || (today.month == dob.month && today.day < dob.day)) {
+      age--;
+    }
+
+    return age;
+  }
+
   // Bạn có thể thêm phương thức từ JSON nếu cần
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -36,3 +55,4 @@ class UserModel {
     );
   }
 }
+

@@ -21,7 +21,7 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  bool isCheck = false;
+  bool obscureText = true;
 
   @override
   void dispose() {
@@ -32,9 +32,6 @@ class _LoginViewState extends State<LoginView> {
 
   void handleLogin() async {
     try {
-      setState(() {
-        isCheck = true;
-      });
       // Gọi hàm đăng ký và chờ kết quả
       String res = await AuthService().loginUser(
         email: emailController.text,
@@ -55,9 +52,6 @@ class _LoginViewState extends State<LoginView> {
           );
         }
       } else {
-        setState(() {
-          isCheck = false;
-        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi: $res')),
         );
@@ -112,20 +106,26 @@ class _LoginViewState extends State<LoginView> {
                   hitText: "Password",
                   icon: "assets/img/lock.png",
                   controller: passwordController,
-                  obscureText: true,
+                  obscureText: obscureText,
                   rigtIcon: TextButton(
-                      onPressed: () {},
-                      child: Container(
-                          alignment: Alignment.center,
-                          width: 20,
-                          height: 20,
-                          child: Image.asset(
-                            "assets/img/show_password.png",
-                            width: 20,
-                            height: 20,
-                            fit: BoxFit.contain,
-                            color: TColor.gray,
-                          ))),
+                    onPressed: () {
+                      setState(() {
+                        obscureText = !obscureText;
+                      });
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      width: 20,
+                      height: 20,
+                      child: Image.asset(
+                        obscureText ? "assets/img/hide_password.png" : "assets/img/show_password.png", // Cập nhật icon
+                        width: 20,
+                        height: 20,
+                        fit: BoxFit.contain,
+                        color: TColor.gray,
+                      ),
+                    ),
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
