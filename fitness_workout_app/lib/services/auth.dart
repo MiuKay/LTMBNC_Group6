@@ -13,39 +13,42 @@ class AuthService {
     required String lname,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
-    String role = "User";
     try {
-      if (email.isEmpty || password.isEmpty || fname.isEmpty || lname.isEmpty) {
-        return "Vui lòng điền đầy đủ thông tin"; // Lỗi nhập thiếu
+      if (email.isEmpty || password.isEmpty ||
+          fname.isEmpty || lname.isEmpty) {
+        return res = "Vui lòng điền đầy đủ thông tin"; // Lỗi nhập thiếu
       }
 
       if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(email)) {
-        return "Vui lòng điền đúng định dạng email"; // Email sai định dạng
+        return res ="Vui lòng điền đúng định dạng email"; // Email sai định dạng
       }
 
-      // Đăng ký người dùng
-      UserCredential cred = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      if (email.isNotEmpty ||
+          password.isNotEmpty ||
+          fname.isNotEmpty || lname.isNotEmpty) {
+        // register user in auth with email and password
+        UserCredential cred = await _auth.createUserWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        // add user to your  firestore database
+        print(cred.user!.uid);
+        await _firestore.collection("users").doc(cred.user!.uid).set({
+          'fname': fname,
+          'lname': lname,
+          'uid': cred.user!.uid,
+          'email': email,
+        });
 
-      // Thêm người dùng vào Firestore
-      await _firestore.collection("users").doc(cred.user!.uid).set({
-        'fname': fname,
-        'lname': lname,
-        'uid': cred.user!.uid,
-        'email': email,
-        'role': role,
-      });
-
-      res = "success"; // Đăng ký thành công
-    } on FirebaseAuthException catch (e) {
+        res = "success";
+      }
+    }  on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
         res = 'Email đã được sử dụng.';
       } else if (e.code == 'weak-password') {
         res = 'Mật khẩu quá yếu.';
       } else {
-        res = e.message ?? 'Đã xảy ra lỗi không xác định.'; // Sử dụng ? để bảo vệ
+        res = e.message ?? 'Đã xảy ra lỗi không xác định.';
       }
     } catch (err) {
       return err.toString();

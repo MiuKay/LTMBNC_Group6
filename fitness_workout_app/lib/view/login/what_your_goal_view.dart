@@ -7,9 +7,7 @@ import '../../common_widget/round_button.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 
 class WhatYourGoalView extends StatefulWidget {
-  final UserModel user;
-
-  const WhatYourGoalView({super.key, required this.user});
+  const WhatYourGoalView({super.key});
 
   @override
   State<WhatYourGoalView> createState() => _WhatYourGoalViewState();
@@ -140,7 +138,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => WelcomeView(user: widget.user)));
+                                  builder: (context) => const WelcomeView()));
                         }),
                   ],
                 ),

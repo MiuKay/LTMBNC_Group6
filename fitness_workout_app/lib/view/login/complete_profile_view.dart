@@ -10,9 +10,7 @@ import '../../services/auth.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 
 class CompleteProfileView extends StatefulWidget {
-  final UserModel user;
-
-  const CompleteProfileView({super.key, required this.user});
+  const CompleteProfileView({super.key});
 
   @override
   State<CompleteProfileView> createState() => _CompleteProfileViewState();
@@ -48,7 +46,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => WhatYourGoalView(user: widget.user),
+          builder: (context) => const WhatYourGoalView(),
         ),
       );
     } else {

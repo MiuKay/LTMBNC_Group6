@@ -43,21 +43,14 @@ class _SignUpViewState extends State<SignUpView> {
       );
 
       if (res == "success") {
-        // Lấy thông tin người dùng
-        UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
-
-        if (user != null) {
-          Navigator.pushReplacement(
+        //Navigator.pushReplacementNamed(context, '/completeProfile');
+        Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CompleteProfileView(user: user),
-            ),
-          );
-        }
+                builder: (context) => const CompleteProfileView()));
       } else {
-        // Hiển thị thông báo lỗi nếu không thành công
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res)), // Hiển thị thông báo lỗi từ signupUser
+          SnackBar(content: Text('Lỗi: $res')),
         );
       }
     } catch (e) {
