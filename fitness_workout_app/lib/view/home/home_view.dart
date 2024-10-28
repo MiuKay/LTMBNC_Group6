@@ -255,12 +255,12 @@ class _HomeViewState extends State<HomeView> {
                             fontWeight: FontWeight.w700),
                       ),
                       SizedBox(
-                        width: 70,
-                        height: 25,
+                        width: 80,
+                        height: 30,
                         child: RoundButton(
                           title: "Check",
                           type: RoundButtonType.bgGradient,
-                          fontSize: 12,
+                          fontSize: 14,
                           fontWeight: FontWeight.w400,
                           onPressed: () {
                             Navigator.push(

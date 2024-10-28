@@ -29,15 +29,6 @@ class _SleepTrackerViewState extends State<SleepTrackerView> {
     },
   ];
 
-  List findEatArr = [
-    {
-      "name": "Breakfast",
-      "image": "assets/img/m_3.png",
-      "number": "120+ Foods"
-    },
-    {"name": "Lunch", "image": "assets/img/m_4.png", "number": "130+ Foods"},
-  ];
-
   List<int> showingTooltipOnSpots = [4];
 
   @override

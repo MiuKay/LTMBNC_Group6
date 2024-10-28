@@ -15,21 +15,6 @@ class SelectView extends StatefulWidget {
 }
 
 class _SelectViewState extends State<SelectView> {
-  List menuArr = [
-    {
-      "name": "Workout Tracker",
-      "image": "assets/img/menu_exercises.png",
-      "tag": "1"
-    },
-    {
-      "name": "Meal Planner",
-      "image": "assets/img/menu_meal_plan.png",
-      "tag": "2"
-    },
-    {"name": "Sleep Tracker", "image": "assets/img/menu_clock.png", "tag": "3"},
-    {"name": "Tips", "image": "assets/img/menu_tips.png", "tag": "4"},
-  ];
-
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery

@@ -186,15 +186,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               ],
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {},
-                            child: Image.asset(
-                              "assets/img/fav.png",
-                              width: 15,
-                              height: 15,
-                              fit: BoxFit.contain,
-                            ),
-                          )
                         ],
                       ),
                       SizedBox(
@@ -206,6 +197,18 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                           time: "Beginner",
                           color: TColor.secondaryColor2.withOpacity(0.3),
                           onPressed: () {}),
+                      SizedBox(
+                        height: media.width * 0.02,
+                      ),
+                      IconTitleNextRow(
+                          icon: "assets/img/time.png",
+                          title: "Schedule Workout",
+                          time: "Add to Schedule",
+                          color: TColor.primaryColor2.withOpacity(0.3),
+                          onPressed: () {
+
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const WorkoutScheduleView() )  );
+                          }),
                       SizedBox(
                         height: media.width * 0.05,
                       ),

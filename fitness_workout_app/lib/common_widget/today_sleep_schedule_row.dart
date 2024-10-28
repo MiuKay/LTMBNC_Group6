@@ -13,7 +13,7 @@ class TodaySleepScheduleRow extends StatefulWidget {
 }
 
 class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
-  bool positive = false;
+  bool positive = true;
 
   @override
   Widget build(BuildContext context) {
@@ -81,13 +81,29 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
               children: [
                 SizedBox(
                   height: 30,
-                  child: IconButton(
-                    onPressed: () {},
+                  child: PopupMenuButton<String>(
                     icon: Image.asset(
                       "assets/img/More_V.png",
                       width: 20,
                       height: 20,
                     ),
+                    onSelected: (value) {
+                      if (value == 'edit') {
+                        // Hành động Edit
+                      } else if (value == 'remove') {
+                        // Hành động Remove
+                      }
+                    },
+                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Text('Edit'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'remove',
+                        child: Text('Remove'),
+                      ),
+                    ],
                   ),
                 ),
                 SizedBox(
@@ -97,14 +113,16 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                     child: CustomAnimatedToggleSwitch<bool>(
                       current: positive,
                       values: [false, true],
-                      indicatorSize: const Size.square(30.0),
-                      animationDuration: const Duration(milliseconds: 200),
+
+                      indicatorSize: Size.square(30.0),
+                      animationDuration:
+                      const Duration(milliseconds: 200),
                       animationCurve: Curves.linear,
                       onChanged: (b) => setState(() => positive = b),
                       iconBuilder: (context, local, global) {
                         return const SizedBox();
                       },
-                      iconsTappable: false,
+                      iconsTappable: true,
                       wrapperBuilder: (context, global, child) {
                         return Stack(
                           alignment: Alignment.center,
@@ -112,12 +130,14 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                             Positioned(
                                 left: 10.0,
                                 right: 10.0,
+
                                 height: 30.0,
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                        colors: TColor.secondaryG),
-                                    borderRadius: const BorderRadius.all(
+                                        colors: TColor.thirdG),
+                                    borderRadius:
+                                    const BorderRadius.all(
                                         Radius.circular(50.0)),
                                   ),
                                 )),
@@ -131,8 +151,8 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                           child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: TColor.white,
-                              borderRadius:
-                              const BorderRadius.all(Radius.circular(50.0)),
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(50.0)),
                               boxShadow: const [
                                 BoxShadow(
                                     color: Colors.black38,
@@ -148,7 +168,7 @@ class _TodaySleepScheduleRowState extends State<TodaySleepScheduleRow> {
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ));
   }

@@ -307,12 +307,22 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        "What Do You Want to Train",
+                        "Recommended for you",
                         style: TextStyle(
                             color: TColor.black,
                             fontSize: 16,
                             fontWeight: FontWeight.w700),
                       ),
+                      TextButton(
+                        onPressed: () {},
+                        child: Text(
+                          "See Full",
+                          style: TextStyle(
+                              color: TColor.gray,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700),
+                        ),
+                      )
                     ],
                   ),
                   ListView.builder(
