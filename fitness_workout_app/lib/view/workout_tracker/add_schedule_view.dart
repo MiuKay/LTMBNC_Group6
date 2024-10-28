@@ -49,26 +49,6 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           style: TextStyle(
               color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
         ),
-        actions: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: TColor.lightGray,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(
-                "assets/img/more_btn.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
-        ],
       ),
       backgroundColor: TColor.white,
       body: Container(
@@ -78,15 +58,15 @@ class _AddScheduleViewState extends State<AddScheduleView> {
             children: [
               Image.asset(
                 "assets/img/date.png",
-                width: 20,
-                height: 20,
+                width: 21,
+                height: 21,
               ),
               const SizedBox(
-                width: 8,
+                width: 12,
               ),
               Text(
                 dateToString(widget.date, formatStr: "E, dd MMMM yyyy"),
-                style: TextStyle(color: TColor.gray, fontSize: 14),
+                style: TextStyle(color: TColor.gray, fontSize: 15),
               ),
             ],
           ),
@@ -96,7 +76,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           Text(
             "Time",
             style: TextStyle(
-                color: TColor.black, fontSize: 14, fontWeight: FontWeight.w500),
+                color: TColor.black, fontSize: 15, fontWeight: FontWeight.w500),
           ),
           SizedBox(
             height: media.width * 0.35,
@@ -109,15 +89,15 @@ class _AddScheduleViewState extends State<AddScheduleView> {
             ),
           ),
           const SizedBox(
-            height: 20,
+            height: 24,
           ),
           Text(
             "Details Workout",
             style: TextStyle(
-                color: TColor.black, fontSize: 14, fontWeight: FontWeight.w500),
+                color: TColor.black, fontSize: 15, fontWeight: FontWeight.w500),
           ),
           const SizedBox(
-            height: 8,
+            height: 10,
           ),
           IconTitleNextRow(
               icon: "assets/img/choose_workout.png",
@@ -126,30 +106,12 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               color: TColor.lightGray,
               onPressed: () {}),
           const SizedBox(
-            height: 10,
+            height: 12,
           ),
           IconTitleNextRow(
               icon: "assets/img/difficulity.png",
               title: "Difficulity",
               time: "Beginner",
-              color: TColor.lightGray,
-              onPressed: () {}),
-          const SizedBox(
-            height: 10,
-          ),
-          IconTitleNextRow(
-              icon: "assets/img/repetitions.png",
-              title: "Custom Repetitions",
-              time: "",
-              color: TColor.lightGray,
-              onPressed: () {}),
-          const SizedBox(
-            height: 10,
-          ),
-          IconTitleNextRow(
-              icon: "assets/img/repetitions.png",
-              title: "Custom Weights",
-              time: "",
               color: TColor.lightGray,
               onPressed: () {}),
           Spacer(),

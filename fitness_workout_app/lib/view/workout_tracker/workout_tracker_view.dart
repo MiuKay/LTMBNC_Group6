@@ -1,5 +1,6 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workour_detail_view.dart';
+import 'package:fitness_workout_app/view/workout_tracker/workout_schedule_view.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -87,29 +88,9 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                 "Workout Tracker",
                 style: TextStyle(
                     color: TColor.white,
-                    fontSize: 16,
+                    fontSize: 22,
                     fontWeight: FontWeight.w700),
               ),
-              actions: [
-                InkWell(
-                  onTap: () {},
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    height: 40,
-                    width: 40,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: TColor.lightGray,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Image.asset(
-                      "assets/img/more_btn.png",
-                      width: 15,
-                      height: 15,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                )
-              ],
             ),
             SliverAppBar(
               backgroundColor: Colors.transparent,
@@ -264,21 +245,21 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                               fontWeight: FontWeight.w700),
                         ),
                         SizedBox(
-                          width: 70,
-                          height: 25,
+                          width: 80,
+                          height: 30,
                           child: RoundButton(
                             title: "Check",
                             type: RoundButtonType.bgGradient,
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w400,
                             onPressed: () {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) =>
-                              //         const ActivityTrackerView(),
-                              //   ),
-                              // );
+                               Navigator.push(
+                                context,
+                                 MaterialPageRoute(
+                                  builder: (context) =>
+                                       const WorkoutScheduleView(),
+                                 ),
+                               );
                             },
                           ),
                         )
@@ -342,9 +323,6 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                       itemBuilder: (context, index) {
                         var wObj = whatArr[index] as Map? ?? {};
                         return InkWell(
-                            onTap: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context) =>  WorkoutDetailView( dObj: wObj, ) ));
-                            },
                             child:  WhatTrainRow(wObj: wObj) );
                       }),
                   SizedBox(

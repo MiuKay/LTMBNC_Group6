@@ -2,9 +2,11 @@ import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:flutter/material.dart';
 
 import '../common/colo_extension.dart';
+import '../view/workout_tracker/workour_detail_view.dart';
 
 class WhatTrainRow extends StatelessWidget {
   final Map wObj;
+
   const WhatTrainRow({super.key, required this.wObj});
 
   @override
@@ -41,7 +43,8 @@ class WhatTrainRow extends StatelessWidget {
                       height: 4,
                     ),
                     Text(
-                      "${wObj["exercises"].toString()} | ${ wObj["time"].toString() }" ,
+                      "${wObj["exercises"].toString()} | ${ wObj["time"]
+                          .toString() }",
                       style: TextStyle(
                         color: TColor.gray,
                         fontSize: 12,
@@ -51,15 +54,19 @@ class WhatTrainRow extends StatelessWidget {
                       height: 15,
                     ),
                     SizedBox(
-                      width: 100,
-                      height: 30,
-                      child: RoundButton(
+                        width: 100,
+                        height: 30,
+                        child: RoundButton(
                           title: "View More",
                           fontSize: 10,
                           type: RoundButtonType.textGradient,
-                          elevation:0.05,
+                          elevation: 0.05,
                           fontWeight: FontWeight.w400,
-                          onPressed: () {}),
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (
+                                context) => WorkoutDetailView(dObj: wObj,)));
+                          },
+                        )
                     )
                   ],
                 ),

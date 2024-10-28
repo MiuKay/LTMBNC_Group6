@@ -24,40 +24,12 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
   List eventArr = [
     {
       "name": "Ab Workout",
-      "start_time": "25/05/2023 07:30 AM",
+      "start_time": "27/10/2024 07:30 AM",
     },
     {
       "name": "Upperbody Workout",
-      "start_time": "25/05/2023 09:00 AM",
+      "start_time": "28/10/2024 09:00 AM",
     },
-    {
-      "name": "Lowerbody Workout",
-      "start_time": "25/05/2023 03:00 PM",
-    },
-    {
-      "name": "Ab Workout",
-      "start_time": "26/05/2023 07:30 AM",
-    },
-    {
-      "name": "Upperbody Workout",
-      "start_time": "26/05/2023 09:00 AM",
-    },
-    {
-      "name": "Lowerbody Workout",
-      "start_time": "26/05/2023 03:00 PM",
-    },
-    {
-      "name": "Ab Workout",
-      "start_time": "27/05/2023 07:30 AM",
-    },
-    {
-      "name": "Upperbody Workout",
-      "start_time": "27/05/2023 09:00 AM",
-    },
-    {
-      "name": "Lowerbody Workout",
-      "start_time": "27/05/2023 03:00 PM",
-    }
   ];
 
   List selectDayEventArr = [];
@@ -122,26 +94,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
           style: TextStyle(
               color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
         ),
-        actions: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: TColor.lightGray,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(
-                "assets/img/more_btn.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
-        ],
       ),
       backgroundColor: TColor.white,
       body: Column(

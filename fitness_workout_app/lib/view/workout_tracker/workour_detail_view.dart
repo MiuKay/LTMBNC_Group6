@@ -1,7 +1,8 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/common_widget/icon_title_next_row.dart';
 import 'package:fitness_workout_app/common_widget/round_button.dart';
-import 'package:fitness_workout_app/view/workout_tracker/exercises_stpe_details.dart';
+import 'package:fitness_workout_app/view/workout_tracker/exercises_step_details.dart';
+import 'package:fitness_workout_app/view/workout_tracker/ready_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workout_schedule_view.dart';
 import 'package:flutter/material.dart';
 
@@ -117,26 +118,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                   ),
                 ),
               ),
-              actions: [
-                InkWell(
-                  onTap: () {},
-                  child: Container(
-                    margin: const EdgeInsets.all(8),
-                    height: 40,
-                    width: 40,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                        color: TColor.lightGray,
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Image.asset(
-                      "assets/img/more_btn.png",
-                      width: 15,
-                      height: 15,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                )
-              ],
             ),
             SliverAppBar(
               backgroundColor: Colors.transparent,
@@ -218,18 +199,6 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       ),
                       SizedBox(
                         height: media.width * 0.05,
-                      ),
-                      IconTitleNextRow(
-                          icon: "assets/img/time.png",
-                          title: "Schedule Workout",
-                          time: "5/27, 09:00 AM",
-                          color: TColor.primaryColor2.withOpacity(0.3),
-                          onPressed: () {
-
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const WorkoutScheduleView() )  );
-                          }),
-                      SizedBox(
-                        height: media.width * 0.02,
                       ),
                       IconTitleNextRow(
                           icon: "assets/img/difficulity.png",
@@ -358,7 +327,9 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      RoundButton(title: "Start Workout", onPressed: () {})
+                      RoundButton(title: "Start Workout", onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ReadyView()));
+                      })
                     ],
                   ),
                 )
