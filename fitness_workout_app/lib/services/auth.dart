@@ -1,6 +1,10 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 
 class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -13,6 +17,8 @@ class AuthService {
     required String lname,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
+    bool activate = false;
+    String role = "user";
     try {
       if (email.isEmpty || password.isEmpty ||
           fname.isEmpty || lname.isEmpty) {
@@ -20,7 +26,15 @@ class AuthService {
       }
 
       if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(email)) {
-        return res ="Vui lòng điền đúng định dạng email"; // Email sai định dạng
+        return
+          res = "Vui lòng điền đúng định dạng email"; // Email sai định dạng
+      }
+
+      // Lấy thông tin user từ Firestore dựa trên email
+      var userSnapshot = await _firestore.collection('users').where('email', isEqualTo: email).get();
+
+      if (userSnapshot.docs.isNotEmpty) {
+        return "Email này đã được đăng ký.";
       }
 
       if (email.isNotEmpty ||
@@ -38,17 +52,12 @@ class AuthService {
           'lname': lname,
           'uid': cred.user!.uid,
           'email': email,
+          'password': password,
+          'role': role,
+          'activate': activate,
         });
 
         res = "success";
-      }
-    }  on FirebaseAuthException catch (e) {
-      if (e.code == 'email-already-in-use') {
-        res = 'Email đã được sử dụng.';
-      } else if (e.code == 'weak-password') {
-        res = 'Mật khẩu quá yếu.';
-      } else {
-        res = e.message ?? 'Đã xảy ra lỗi không xác định.';
       }
     } catch (err) {
       return err.toString();
@@ -67,8 +76,23 @@ class AuthService {
         return "Vui lòng nhập đầy đủ thông tin"; // Lỗi nhập thiếu
       }
 
-      if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(email)) {
+      if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(
+          email)) {
         return "Vui lòng nhập đúng định dạng email"; // Email sai định dạng
+      }
+
+      // Lấy thông tin user từ Firestore dựa trên email
+      var userSnapshot = await _firestore.collection('users').where('email', isEqualTo: email).get();
+
+      if (userSnapshot.docs.isEmpty) {
+        return "Không tìm thấy tài khoản với email này.";
+      }
+
+      var userDoc = userSnapshot.docs.first;
+      bool isActivated = userDoc['activate'];
+
+      if (!isActivated) {
+        return "not-activate";
       }
 
       // Đăng nhập người dùng bằng email và mật khẩu
@@ -76,28 +100,13 @@ class AuthService {
         email: email,
         password: password,
       );
-      return "success";
-    } catch (error) {
-      if (error is FirebaseAuthException) {
-        // Kiểm tra mã lỗi của Firebase
-        switch (error.code) {
-          case 'invalid-email':
-            return "Email không hợp lệ.";
-          case 'user-disabled':
-            return "Tài khoản của bạn đã bị vô hiệu hóa.";
-          case 'user-not-found':
-            return "Không tìm thấy tài khoản với email này.";
-          case 'wrong-password':
-            return "Mật khẩu không đúng.";
-          case 'operation-not-allowed':
-            return "Đăng nhập bằng email và mật khẩu không được phép.";
-          default:
-            return "Có lỗi xảy ra. Vui lòng thử lại.";
-        }
-      } else {
-        return res; // Lỗi không xác định
-      }
+
+      res = "success";
+
+    } catch (err) {
+      return err.toString();
     }
+    return res;
   }
 
   // for sighout
@@ -115,7 +124,8 @@ class AuthService {
     String res = "Có lỗi gì đó xảy ra";
     String pic = "";
 
-    if (dateOfBirth.isEmpty || gender.isEmpty || weight.isEmpty || height.isEmpty) {
+    if (dateOfBirth.isEmpty || gender.isEmpty || weight.isEmpty ||
+        height.isEmpty) {
       return "Vui lòng điền đầy đủ thông tin.";
     }
 
@@ -123,7 +133,8 @@ class AuthService {
       return "Cân nặng phải là số và lớn hơn 30.";
     }
 
-    if (double.tryParse(height) == null || double.parse(height) <= 50 || double.parse(height) >= 300) {
+    if (double.tryParse(height) == null || double.parse(height) <= 50 ||
+        double.parse(height) >= 300) {
       return "Chiều cao phải là số và lớn hơn 50 và nhỏ hơn 300.";
     }
 
@@ -144,7 +155,9 @@ class AuthService {
   }
 
   Future<UserModel?> getUserInfo(String uid) async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users").doc(uid).get();
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection("users")
+        .doc(uid)
+        .get();
 
     if (doc.exists) {
       return UserModel.fromJson(doc.data() as Map<String, dynamic>);
@@ -174,13 +187,15 @@ class AuthService {
   }) async {
     String res = "Có lỗi gì đó xảy ra";
 
-    if (fname.isEmpty || lname.isEmpty || dateOfBirth.isEmpty || gender.isEmpty || weight.isEmpty || height.isEmpty) {
+    if (fname.isEmpty || lname.isEmpty || dateOfBirth.isEmpty ||
+        gender.isEmpty || weight.isEmpty || height.isEmpty) {
       return "Vui lòng điền đầy đủ thông tin.";
     }
     if (double.tryParse(weight) == null || double.parse(weight) <= 30) {
       return "Cân nặng phải là số và lớn hơn 30.";
     }
-    if (double.tryParse(height) == null || double.parse(height) <= 50 || double.parse(height) >= 300) {
+    if (double.tryParse(height) == null || double.parse(height) <= 50 ||
+        double.parse(height) >= 300) {
       return "Chiều cao phải là số và lớn hơn 50 và nhỏ hơn 300.";
     }
     try {
@@ -199,13 +214,193 @@ class AuthService {
     return res;
   }
 
-  Future<void> resetPassword(String email) async {
+  Future<String> resetPassword(String email, String newPass, String otp) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
-    } catch (e) {
-      throw e;
+      if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(email)) {
+        return  "Vui lòng điền đúng định dạng email"; // Email sai định dạng
+      }
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return "Không tìm thấy người dùng.";
+      }
+
+      // Giả sử chỉ có một tài liệu khớp
+      DocumentSnapshot userDoc = querySnapshot.docs.first;
+
+      String uid = userDoc['uid'];
+      String oldPass = userDoc['password'];
+
+      if (!userDoc.exists) {
+        return "OTP không tồn tại.";
+      }
+
+      var data = userDoc.data() as Map<String, dynamic>?;
+      if (data == null) return "OTP không hợp lệ.";
+
+      int expiresAt = data['expiresAt'];
+      String storedOtp = data['otp'];
+
+      if (DateTime
+          .now()
+          .millisecondsSinceEpoch > expiresAt) {
+        return "OTP đã hết hạn.";
+      }
+
+      if (storedOtp != otp) {
+        return "OTP không đúng.";
+      }
+
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: oldPass,
+      );
+
+      // Lấy thông tin người dùng hiện tại sau khi đăng nhập
+      User? user = _auth.currentUser;
+      if (user == null) {
+        return "Không tìm thấy người dùng.";
+      }
+
+      // Cập nhật mật khẩu mới
+      await user.updatePassword(newPass);
+
+      await _auth.signOut();
+
+      await _firestore.collection("users").doc(uid).update({
+        'password': newPass,
+      });
+
+      return "success";
+
+    }catch(e) {
+      return 'Có lỗi xảy ra: $e';
     }
   }
 
+  Future<String> sendOtpEmail(String uid) async {
+    try {
+      // Lấy email từ Firestore dựa trên uid
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(uid).get();
+      if (!userDoc.exists) {
+        return "Không tìm thấy người dùng.";
+      }
+      String email = userDoc['email'];
+
+      // Tạo mã OTP ngẫu nhiên
+      String otp = _generateOtp();
+      // Thời gian hết hạn sau 2 phút (đơn vị là milliseconds)
+      int expiryTime = DateTime.now().add(Duration(minutes: 2)).millisecondsSinceEpoch;
+
+      // Lưu OTP và thời gian hết hạn vào Firestore
+      await _firestore.collection("users").doc(uid).update({
+        'otp': otp,
+        'expiresAt': expiryTime,
+      });
+
+      // Cấu hình máy chủ SMTP (ví dụ sử dụng Gmail SMTP)
+      final smtpServer = gmail('tvih6693@gmail.com', 'sssq sgfi oifh kxja');
+
+      // Tạo nội dung email
+      final message = Message()
+        ..from = Address('fitnessapp@gmail.com', 'Fitness app')
+        ..recipients.add(email)
+        ..subject = 'Mã OTP của bạn'
+        ..text = 'Mã OTP của bạn là: $otp. Mã này có hiệu lực trong 2 phút.';
+
+      // Gửi email
+      await send(message, smtpServer);
+
+      return 'success';
+    } catch (e) {
+      return 'Có lỗi xảy ra: $e';
+    }
+  }
+
+  Future<String> sendOtpEmailResetPass(String email) async {
+    try {
+      if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(email)) {
+        return  "Vui lòng điền đúng định dạng email"; // Email sai định dạng
+      }
+      // Truy vấn Firestore để tìm tài liệu có trường email khớp với email được cung cấp
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .where('email', isEqualTo: email)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return "Không tìm thấy người dùng.";
+      }
+
+      // Giả sử chỉ có một tài liệu khớp
+      DocumentSnapshot userDoc = querySnapshot.docs.first;
+
+      // Lấy email từ tài liệu
+      String uemail = userDoc['email'];
+
+      // Tạo OTP và cập nhật vào tài liệu
+      String otp = _generateOtp();
+      int expiryTime = DateTime.now().add(Duration(minutes: 2)).millisecondsSinceEpoch;
+
+      await _firestore.collection("users").doc(userDoc.id).update({
+        'otp': otp,
+        'expiresAt': expiryTime,
+      });
+
+      // Cấu hình và gửi email
+      final smtpServer = gmail('tvih6693@gmail.com', 'sssq sgfi oifh kxja');
+      final message = Message()
+        ..from = Address('fitnessapp@gmail.com', 'Fitness app')
+        ..recipients.add(uemail)
+        ..subject = 'Mã OTP của bạn'
+        ..text = 'Mã OTP của bạn là: $otp. Mã này có hiệu lực trong 2 phút.';
+
+      await send(message, smtpServer);
+
+      return 'success';
+    } catch (e) {
+      return 'Có lỗi xảy ra: $e';
+    }
+  }
+
+
+  // Hàm để tạo mã OTP ngẫu nhiên
+  String _generateOtp() {
+    final random = Random();
+    return List.generate(6, (_) => random.nextInt(10).toString()).join();
+  }
+
+  // Xác minh OTP và kiểm tra thời gian hết hạn
+  Future<String> verifyOtp({required String uid, required String otp}) async {
+    DocumentSnapshot snapshot = await _firestore.collection('users').doc(uid).get();
+    if (!snapshot.exists) {
+      return "OTP không tồn tại.";
+    }
+
+    var data = snapshot.data() as Map<String, dynamic>?;
+    if (data == null) return "OTP không hợp lệ.";
+
+    int expiresAt = data['expiresAt'];
+    String storedOtp = data['otp'];
+
+    if (DateTime.now().millisecondsSinceEpoch > expiresAt) {
+      return "OTP đã hết hạn.";
+    }
+
+    if (storedOtp != otp) {
+      return "OTP không đúng.";
+    }
+
+    await _firestore.collection("users").doc(uid).update({
+      'activate': true,
+    });
+
+    return "success";
+  }
+
 }
+
 

@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/view/login/login_view.dart';
 import 'package:fitness_workout_app/view/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:fitness_workout_app/model/user_model.dart';
 
 import '../../services/auth.dart';
 import '../setting/PrivacyPolicy_and_TermOfUse_View.dart';
+import '../setting/select_language_view.dart';
 
 class ProfileView extends StatefulWidget {
   final UserModel user;
@@ -62,31 +62,12 @@ class _ProfileViewState extends State<ProfileView> {
         centerTitle: true,
         elevation: 0,
         leadingWidth: 0,
+        leading: const SizedBox(),
         title: Text(
           "Profile",
           style: TextStyle(
-              color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
+              color: TColor.black, fontSize: 22, fontWeight: FontWeight.w700),
         ),
-        actions: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: TColor.lightGray,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(
-                "assets/img/more_btn.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
-        ],
       ),
       backgroundColor: TColor.white,
       body: SingleChildScrollView(
@@ -412,7 +393,11 @@ class _ProfileViewState extends State<ProfileView> {
                       icon: "assets/img/language.png",
                       title: "Language",
                       onPressed: () {
-                        // xử lý sự kiện khi ấn vào "Activity History"
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                const SelectLanguageView()));
                       },
                     ),
                   ],

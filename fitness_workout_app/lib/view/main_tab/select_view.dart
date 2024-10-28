@@ -3,17 +3,13 @@ import 'package:fitness_workout_app/view/meal_planner/meal_planner_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workout_tracker_view.dart';
 import 'package:flutter/material.dart';
 
+import '../../common/colo_extension.dart';
+import '../../common_widget/menu_cell.dart';
 import '../sleep_tracker/sleep_tracker_view.dart';
+import '../tips/tips_view.dart';
 
-class SelectView extends StatelessWidget {
+class SelectView extends StatefulWidget {
   const SelectView({super.key});
-<<<<<<< Updated upstream
-
-  @override
-  Widget build(BuildContext context) {
-    // var media = MediaQuery.of(context).size;
-
-=======
   @override
   State<SelectView> createState() => _SelectViewState();
 }
@@ -39,54 +35,19 @@ class _SelectViewState extends State<SelectView> {
     var media = MediaQuery
         .of(context)
         .size;
->>>>>>> Stashed changes
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            RoundButton(
-                title: "Workout Tracker",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const WorkoutTrackerView(),
-                    ),
-                  );
-                }),
-
-            const SizedBox(height: 15,),
-
-            RoundButton(
-                title: "Meal Planner",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MealPlannerView(),
-                    ),
-                  );
-                }),
-
-            const SizedBox(height: 15,),
-
-            RoundButton(
-                title: "Sleep Tracker",
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SleepTrackerView(),
-                    ),
-                  );
-                })
-          ],
+      appBar: AppBar(
+        backgroundColor: TColor.white,
+        centerTitle: true,
+        elevation: 0,
+        leadingWidth: 0,
+        leading: const SizedBox(),
+        title: Text(
+          "Select Activity",
+          style: TextStyle(
+              color: TColor.black, fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
-<<<<<<< Updated upstream
-=======
       backgroundColor: TColor.white,
       body: SingleChildScrollView(
         child: Column(
@@ -354,7 +315,6 @@ class _SelectViewState extends State<SelectView> {
           ],
         ),
       ),
->>>>>>> Stashed changes
     );
   }
 }

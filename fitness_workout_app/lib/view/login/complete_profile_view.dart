@@ -9,6 +9,8 @@ import '../../common_widget/selectDate.dart';
 import '../../services/auth.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
 
+import 'activate_account.dart';
+
 class CompleteProfileView extends StatefulWidget {
   const CompleteProfileView({super.key});
 
@@ -56,7 +58,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
       setState(() {
         isLoading = false;
       });
-    } else {
+    }else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(res)),
       );
@@ -65,6 +67,7 @@ class _CompleteProfileViewState extends State<CompleteProfileView> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,6 @@
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/common_widget/tab_button.dart';
+import 'package:fitness_workout_app/view/main_tab/search_view.dart';
 import 'package:fitness_workout_app/view/main_tab/select_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
@@ -41,6 +42,8 @@ class _MainTabViewState extends State<MainTabView> {
         return PhotoProgressView(user: widget.user);
       case 3:
         return ProfileView(user: widget.user);
+      case 4:
+        return const SearchView();
       default:
         return HomeView(user: widget.user);
     }
@@ -56,26 +59,32 @@ class _MainTabViewState extends State<MainTabView> {
         width: 70,
         height: 70,
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            setState(() {
+              selectTab = 4;
+              currentTab = _getTab(selectTab);
+            });
+          },
           child: Container(
             width: 65,
             height: 65,
             decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: TColor.primaryG,
-                ),
-                borderRadius: BorderRadius.circular(35),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 2,
-                  )
-                ]
+              gradient: LinearGradient(
+                colors: TColor.primaryG,
+              ),
+              borderRadius: BorderRadius.circular(35),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 2,
+                )
+              ],
             ),
             child: Icon(Icons.search, color: TColor.white, size: 35),
           ),
         ),
       ),
+
       bottomNavigationBar: BottomAppBar(
           child: Container(
             decoration: BoxDecoration(color: TColor.white, boxShadow: const [

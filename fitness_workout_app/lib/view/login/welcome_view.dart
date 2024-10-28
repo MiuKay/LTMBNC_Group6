@@ -15,6 +15,30 @@ class WelcomeView extends StatefulWidget {
 }
 
 class _WelcomeViewState extends State<WelcomeView> {
+  String lname = "";
+  String fname = "";
+
+  @override
+  void initState() {
+    super.initState();
+    getUserName();
+  }
+
+
+  void getUserName() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(FirebaseAuth.instance.currentUser!.uid);
+      setState(() {
+        fname = user!.fname;
+        lname = user.lname;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
 
   void getUserInfo() async {
     try {
@@ -66,7 +90,7 @@ class _WelcomeViewState extends State<WelcomeView> {
                 height: media.width * 0.1,
               ),
               Text(
-                "Welcome, Stefani",
+                "Welcome, ${fname} ${lname}",
                 style: TextStyle(
                     color: TColor.black,
                     fontSize: 20,

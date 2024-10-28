@@ -2,14 +2,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/common_widget/round_button.dart';
 import 'package:fitness_workout_app/common_widget/round_textfield.dart';
-import 'package:fitness_workout_app/view/login/complete_profile_view.dart';
 import 'package:fitness_workout_app/view/login/reset_password_view.dart';
 import 'package:fitness_workout_app/view/login/signup_view.dart';
+import 'package:fitness_workout_app/view/login/welcome_view.dart';
 import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/services/auth.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
-
-import '../main_tab/main_tab_view.dart';
+import 'activate_account.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -41,6 +40,31 @@ class _LoginViewState extends State<LoginView> {
         password: passwordController.text,
       );
 
+      if(res == "not-activate"){
+        String res1 = await AuthService().sendOtpEmail(FirebaseAuth.instance.currentUser!.uid);
+        if (res1 == "success"){
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('OTP đã được gửi đến email của bạn')),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ActivateAccountView(),
+            ),
+          );
+          setState(() {
+            isLoading = false;
+          });
+        }else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(res1)),
+          );
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+
       if (res == "success") {
         // Lấy thông tin người dùng
         UserModel? user = await AuthService().getUserInfo(
@@ -52,7 +76,7 @@ class _LoginViewState extends State<LoginView> {
             context,
             MaterialPageRoute(
               builder: (context) =>
-                  MainTabView(user: user), // Truyền user vào HomeView
+                  const WelcomeView(), // Truyền user vào HomeView
             ),
           );
         }

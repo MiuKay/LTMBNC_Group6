@@ -14,7 +14,54 @@ class ResetPasswordView extends StatefulWidget {
 
 class _ResetPasswordView extends State<ResetPasswordView> {
   final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPassController = TextEditingController();
+  final TextEditingController otpController = TextEditingController();
   bool isCheck = false;
+  bool obscureText = true;
+  bool obscureText1 = true;
+
+  void getOTP() async {
+    setState(() {
+      isCheck = true;
+    });
+
+    try {
+      if (emailController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Vui lòng nhập email để nhận OTP')),
+        );
+        setState(() {
+          isCheck = false;
+        });
+      } else {
+        String res = await AuthService().sendOtpEmailResetPass(
+            emailController.text.trim());
+        if (res == "success") {
+          setState(() {
+            isCheck = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('OTP đã được gửi đến email của bạn')),
+          );
+        } else {
+          setState(() {
+            isCheck = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(res)),
+          );
+        }
+      }
+    }catch (e) {
+      setState(() {
+        isCheck = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
 
   void handleResetpassword() async {
     setState(() {
@@ -22,34 +69,66 @@ class _ResetPasswordView extends State<ResetPasswordView> {
     });
 
     try {
-      await AuthService().resetPassword(emailController.text.trim());
-      setState(() {
-        isCheck = false;
-      });
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Success"),
-            content: Text("Password reset email sent successfully!"),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(); // Đóng bảng thông báo
-                },
-                child: Text("OK"),
-              ),
-            ],
+      if (emailController.text.isEmpty || passwordController.text.isEmpty
+          || confirmPassController.text.isEmpty || otpController.text.isEmpty) {
+        setState(() {
+          isCheck = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')),
+        );
+      } else
+      if (passwordController.text.trim() != confirmPassController.text.trim()) {
+        setState(() {
+          isCheck = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Xác nhận mật khẩu không chính xác')),
+        );
+      } else {
+        String res = await AuthService().resetPassword(
+            emailController.text.trim(),
+            passwordController.text.trim(),
+            otpController.text.trim());
+        if (res == "success") {
+          setState(() {
+            isCheck = false;
+          });
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text("Success"),
+                content: Text("Password reset successfully!"),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginView()));
+                    },
+                    child: Text("OK"),
+                  ),
+                ],
+              );
+            },
           );
-        },
-      );
+        }
+        else {
+          setState(() {
+            isCheck = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(res)),
+          );
+        }
+      }
     } catch (e) {
       setState(() {
         isCheck = false;
       });
 
-      // Hiển thị lỗi nếu có vấn đề xảy ra
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(e.toString())),
       );
@@ -61,6 +140,9 @@ class _ResetPasswordView extends State<ResetPasswordView> {
   void dispose() {
     super.dispose();
     emailController.dispose();
+    passwordController.dispose();
+    confirmPassController.dispose();
+    otpController.dispose();
   }
 
 
@@ -107,7 +189,7 @@ class _ResetPasswordView extends State<ResetPasswordView> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: media.width * 0.01,
+                      height: media.width * 0.02,
                     ),
                     Text(
                       "Reset password",
@@ -116,21 +198,12 @@ class _ResetPasswordView extends State<ResetPasswordView> {
                           fontWeight: FontWeight.w700),
                     ),
                     Text(
-                      "Please enter your email to reset the password",
+                      "Please enter your email and new password to reset the password",
                       style: TextStyle(
                           color: TColor.gray, fontSize: 13),
                     ),
                     SizedBox(
-                      height: media.width * 0.5,
-                    ),
-                    Text(
-                      "Your Email",
-                      style: TextStyle(color: TColor.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700),
-                    ),
-                    SizedBox(
-                      height: media.width * 0.01,
+                      height: media.width * 0.05,
                     ),
                     RoundTextField(
                       hitText: "Email",
@@ -140,6 +213,92 @@ class _ResetPasswordView extends State<ResetPasswordView> {
                     ),
                     SizedBox(
                       height: media.width * 0.04,
+                    ),
+                    RoundTextField(
+                      hitText: "New Password",
+                      icon: "assets/img/lock.png",
+                      controller: passwordController,
+                      obscureText: obscureText,
+                      rigtIcon: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            obscureText = !obscureText;
+                          });
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: 20,
+                          height: 20,
+                          child: Image.asset(
+                            obscureText
+                                ? "assets/img/hide_password.png"
+                                : "assets/img/show_password.png",
+                            // Cập nhật icon
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.contain,
+                            color: TColor.gray,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: media.width * 0.04,
+                    ),
+                    RoundTextField(
+                      hitText: "Confirm New Password",
+                      icon: "assets/img/lock.png",
+                      controller: confirmPassController,
+                      obscureText: obscureText1,
+                      rigtIcon: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            obscureText1 = !obscureText1;
+                          });
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          width: 20,
+                          height: 20,
+                          child: Image.asset(
+                            obscureText1
+                                ? "assets/img/hide_password.png"
+                                : "assets/img/show_password.png",
+                            // Cập nhật icon
+                            width: 20,
+                            height: 20,
+                            fit: BoxFit.contain,
+                            color: TColor.gray,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: media.width * 0.04,
+                    ),
+                    Row(
+                      children: [
+                        // Expanded để RoundTextField chiếm phần lớn không gian
+                        Expanded(
+                          child: RoundTextField(
+                            hitText: "OTP",
+                            icon: "assets/img/otp.png",
+                            controller: otpController,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        Container(
+                          width: 100,
+                          child: RoundButton(
+                            type: RoundButtonType.bgSGradient,
+                            title: "Get OTP",
+                            onPressed: getOTP,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: media.width * 0.06,
                     ),
                     RoundButton(
                         title: "Reset Password",
