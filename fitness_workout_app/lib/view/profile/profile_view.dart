@@ -1,4 +1,5 @@
 import 'package:fitness_workout_app/view/login/login_view.dart';
+import 'package:fitness_workout_app/view/profile/change_goal_view.dart';
 import 'package:fitness_workout_app/view/profile/edit_profile_view.dart';
 import 'package:flutter/material.dart';
 
@@ -191,7 +192,7 @@ class _ProfileViewState extends State<ProfileView> {
                       icon: "assets/img/p_activity.png",
                       title: "Activity History",
                       onPressed: () {
-                        // xử lý sự kiện khi ấn vào "Activity History"
+                        // xử lý sự kiện khi ấn vào "Activity History"\
                       },
                     ),
                     const SizedBox(height: 8),
@@ -199,7 +200,20 @@ class _ProfileViewState extends State<ProfileView> {
                       icon: "assets/img/p_workout.png",
                       title: "Workout Progress",
                       onPressed: () {
-                        // xử lý sự kiện khi ấn vào "Workout Progress"
+
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    SettingRow(
+                      icon: "assets/img/p_workout.png",
+                      title: "Change Goal",
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ChangeGoalView(),
+                          ),
+                        );
                       },
                     ),
                   ],

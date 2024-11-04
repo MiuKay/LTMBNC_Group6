@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:readmore/readmore.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../common/colo_extension.dart';
-import '../../common_widget/round_button.dart';
 import '../../common_widget/step_detail_row.dart';
+import '../../model/exercise_model.dart';
+import '../../model/step_exercise_model.dart';
+import '../../services/exercises.dart';
 
 class ExercisesStepDetails extends StatefulWidget {
-  final Map eObj;
+  final Exercise eObj;
   const ExercisesStepDetails({super.key, required this.eObj});
 
   @override
@@ -15,32 +18,45 @@ class ExercisesStepDetails extends StatefulWidget {
 }
 
 class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
-  List stepArr = [
-    {
-      "no": "01",
-      "title": "Spread Your Arms",
-      "detail":
-      "To make the gestures feel more relaxed, stretch your arms as you start this movement. No bending of hands."
-    },
-    {
-      "no": "02",
-      "title": "Rest at The Toe",
-      "detail":
-      "The basis of this movement is jumping. Now, what needs to be considered is that you have to use the tips of your feet"
-    },
-    {
-      "no": "03",
-      "title": "Adjust Foot Movement",
-      "detail":
-      "Jumping Jack is not just an ordinary jump. But, you also have to pay close attention to leg movements."
-    },
-    {
-      "no": "04",
-      "title": "Clapping Both Hands",
-      "detail":
-      "This cannot be taken lightly. You see, without realizing it, the clapping of your hands helps you to keep your rhythm while doing the Jumping Jack"
-    },
-  ];
+  final ExercisesService _stepExercise = ExercisesService();
+  List<StepExercise> stepArr = [];
+  late VideoPlayerController _controller;
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStepExercises();
+    _controller = VideoPlayerController.network(widget.eObj.video)
+      ..initialize().then((_) {
+        setState(() {}); // Cập nhật UI sau khi video đã sẵn sàng
+      });
+
+    // Lắng nghe khi video kết thúc
+    _controller.addListener(() {
+      if (_controller.value.position == _controller.value.duration) {
+        setState(() {
+          _isPlaying = false; // Đặt lại trạng thái khi video kết thúc
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _loadStepExercises() async {
+    String name = widget.eObj.name.toString();
+    List<StepExercise> step_exercises = await _stepExercise.fetchStepExercises(
+      name: name,
+    );
+    setState(() {
+      stepArr = step_exercises;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,26 +86,6 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
             ),
           ),
         ),
-        actions: [
-          InkWell(
-            onTap: () {},
-            child: Container(
-              margin: const EdgeInsets.all(8),
-              height: 40,
-              width: 40,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                  color: TColor.lightGray,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Image.asset(
-                "assets/img/more_btn.png",
-                width: 15,
-                height: 15,
-                fit: BoxFit.contain,
-              ),
-            ),
-          )
-        ],
       ),
       backgroundColor: TColor.white,
       body: SingleChildScrollView(
@@ -98,44 +94,52 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: media.width,
-                    height: media.width * 0.43,
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(colors: TColor.primaryG),
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Image.asset(
-                      "assets/img/video_temp.png",
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    if (_isPlaying) {
+                      _controller.pause();
+                    } else {
+                      _controller.play();
+                    }
+                    _isPlaying = !_isPlaying; // Chuyển đổi trạng thái phát
+                  });
+                },
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
                       width: media.width,
                       height: media.width * 0.43,
-                      fit: BoxFit.contain,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(colors: TColor.primaryG),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: _controller.value.isInitialized
+                          ? VideoPlayer(_controller)
+                          : Center(child: CircularProgressIndicator()), // Hiển thị khi đang tải video
                     ),
-                  ),
-                  Container(
-                    width: media.width,
-                    height: media.width * 0.43,
-                    decoration: BoxDecoration(
-                        color: TColor.black.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(20)),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Image.asset(
-                      "assets/img/Play.png",
-                      width: 30,
-                      height: 30,
-                    ),
-                  ),
-                ],
+                    // Không có lớp phủ ở đây
+                    if (!_isPlaying) // Chỉ hiển thị biểu tượng khi video không đang phát
+                      const Icon(
+                        Icons.play_arrow,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                    if (_isPlaying && _controller.value.position < _controller.value.duration) // Hiện biểu tượng pause khi video đang phát
+                      const Icon(
+                        Icons.pause,
+                        size: 30,
+                        color: Colors.white,
+                      ),
+                  ],
+                ),
               ),
               const SizedBox(
                 height: 15,
               ),
               Text(
-                widget.eObj["title"].toString(),
+                widget.eObj.name.toString(),
                 style: TextStyle(
                     color: TColor.black,
                     fontSize: 16,
@@ -145,7 +149,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 height: 4,
               ),
               Text(
-                "Easy | 390 Calories Burn",
+                "${widget.eObj.difficulty} | ${widget.eObj.calo} Calories Burn",
                 style: TextStyle(
                   color: TColor.gray,
                   fontSize: 12,
@@ -165,7 +169,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 height: 4,
               ),
               ReadMoreText(
-                'A jumping jack, also known as a star jump and called a side-straddle hop in the US military, is a physical jumping exercise performed by jumping to a position with the legs spread wide A jumping jack, also known as a star jump and called a side-straddle hop in the US military, is a physical jumping exercise performed by jumping to a position with the legs spread wide',
+                widget.eObj.descriptions.toString(),
                 trimLines: 4,
                 colorClickableText: TColor.black,
                 trimMode: TrimMode.Line,
@@ -194,7 +198,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                   TextButton(
                     onPressed: () {},
                     child: Text(
-                      "${stepArr.length} Sets",
+                      "${stepArr.length} Steps",
                       style: TextStyle(color: TColor.gray, fontSize: 12),
                     ),
                   )
@@ -205,7 +209,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
                 shrinkWrap: true,
                 itemCount: stepArr.length,
                 itemBuilder: ((context, index) {
-                  var sObj = stepArr[index] as Map? ?? {};
+                  StepExercise sObj = stepArr[index];
 
                   return StepDetailRow(
                     sObj: sObj,

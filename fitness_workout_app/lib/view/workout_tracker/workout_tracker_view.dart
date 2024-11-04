@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workour_detail_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workout_schedule_view.dart';
@@ -7,6 +8,11 @@ import 'package:flutter/material.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/upcoming_workout_row.dart';
 import '../../common_widget/what_train_row.dart';
+import '../../model/user_model.dart';
+import '../../services/auth.dart';
+import '../../services/category_workout.dart';
+import '../main_tab/main_tab_view.dart';
+import 'all_workout_view.dart';
 
 class WorkoutTrackerView extends StatefulWidget {
   const WorkoutTrackerView({super.key});
@@ -16,6 +22,8 @@ class WorkoutTrackerView extends StatefulWidget {
 }
 
 class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
+  final WorkoutService _workoutService = WorkoutService();
+  List<Map<String, dynamic>> whatArr = [];
   List latestArr = [
     {
       "image": "assets/img/Workout1.png",
@@ -29,26 +37,54 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     },
   ];
 
-  List whatArr = [
-    {
-      "image": "assets/img/what_1.png",
-      "title": "Fullbody Workout",
-      "exercises": "11 Exercises",
-      "time": "32mins"
-    },
-    {
-      "image": "assets/img/what_2.png",
-      "title": "Lowebody Workout",
-      "exercises": "12 Exercises",
-      "time": "40mins"
-    },
-    {
-      "image": "assets/img/what_3.png",
-      "title": "AB Workout",
-      "exercises": "14 Exercises",
-      "time": "20mins"
+  @override
+  void initState() {
+    super.initState();
+    _loadCategoryWorkoutsWithLevel();
+  }
+
+  Future<void> _loadCategoryWorkoutsWithLevel() async {
+    UserModel? user = await AuthService().getUserInfo(
+        FirebaseAuth.instance.currentUser!.uid);
+    if (user != null) {
+        String level = user.level;
+        List<Map<String, dynamic>> workouts =
+        await _workoutService.fetchCategoryWorkoutWithLevelList(level: level);
+        setState(() {
+          whatArr = workouts;
+        });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Có lỗi xảy ra')),
+      );
     }
-  ];
+  }
+
+  void getUserInfo() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(
+          FirebaseAuth.instance.currentUser!.uid);
+
+      if (user != null) {
+        // Điều hướng đến HomeView với user
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainTabView(user: user, initialTab: 1),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,9 +101,7 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
               elevation: 0,
               // pinned: true,
               leading: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
+                onTap: getUserInfo,
                 child: Container(
                   margin: const EdgeInsets.all(8),
                   height: 40,
@@ -314,7 +348,15 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                             fontWeight: FontWeight.w700),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                              const AllWorkoutView(),
+                            ),
+                          );
+                        },
                         child: Text(
                           "See Full",
                           style: TextStyle(

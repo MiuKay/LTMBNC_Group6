@@ -4,16 +4,15 @@ import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
 import '../../services/auth.dart';
-import 'activate_account.dart';
 
-class WhatYourGoalView extends StatefulWidget {
-  const WhatYourGoalView({super.key});
+class ChangeGoalView extends StatefulWidget {
+  const ChangeGoalView({super.key});
 
   @override
-  State<WhatYourGoalView> createState() => _WhatYourGoalViewState();
+  State<ChangeGoalView> createState() => _ChangeGoalViewState();
 }
 
-class _WhatYourGoalViewState extends State<WhatYourGoalView> {
+class _ChangeGoalViewState extends State<ChangeGoalView> {
   CarouselSliderController buttonCarouselController = CarouselSliderController();
   String selectedGoal = "Improve Shape";
   int currentIndex = 0;
@@ -39,27 +38,10 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
     },
   ];
 
-  void sentOTP() async {
+  void changeGoal() async {
     try {
-      await AuthService().updateUserLevel(
-          FirebaseAuth.instance.currentUser!.uid, selectedGoal);
-      String res = await AuthService().sendOtpEmail(
-          FirebaseAuth.instance.currentUser!.uid);
-      if (res == "success") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('OTP đã được gửi đến email của bạn')),
-        );
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ActivateAccountView(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(res)),
-        );
-      }
+      await AuthService().updateUserLevel(FirebaseAuth.instance.currentUser!.uid, selectedGoal);
+        Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi xảy ra: $e')),
@@ -172,7 +154,7 @@ class _WhatYourGoalViewState extends State<WhatYourGoalView> {
                     ),
                     RoundButton(
                         title: "Confirm",
-                        onPressed: sentOTP),
+                        onPressed: changeGoal),
                   ],
                 ),
               )

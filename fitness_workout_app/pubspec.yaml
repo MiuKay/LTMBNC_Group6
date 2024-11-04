@@ -54,6 +54,7 @@ dependencies:
   image_picker: ^1.1.2
   mailer: ^6.2.0
   provider: any
+  video_player: ^2.9.2
 
 
 
@@ -86,6 +87,7 @@ flutter:
   assets:
 
     - assets/img/
+    - assets/img/breaktime.jpg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

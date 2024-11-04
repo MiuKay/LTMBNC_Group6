@@ -10,6 +10,7 @@ class UserModel {
   final String weight;
   final String height;
   final String pic;
+  final String level;
 
   UserModel({
     required this.uid,
@@ -21,6 +22,7 @@ class UserModel {
     required this.weight,
     required this.height,
     required this.pic,
+    required this.level
   });
 
   // Tính tuổi người dùng từ ngày sinh
@@ -52,6 +54,7 @@ class UserModel {
       weight: json['weight'],
       height: json['height'],
       pic: json['pic'],
+      level: json['level'],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
+import '../workout_tracker/workout_tracker_view.dart';
 
 class FinishedWorkoutView extends StatefulWidget {
   const FinishedWorkoutView({super.key});
@@ -74,7 +75,13 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
               RoundButton(
                   title: "Back To Home",
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (
+                            context) => const WorkoutTrackerView(),
+                      ),
+                    );
                   }),
 
               const SizedBox(

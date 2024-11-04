@@ -6,7 +6,10 @@ import 'package:fitness_workout_app/view/workout_tracker/ready_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workout_schedule_view.dart';
 import 'package:flutter/material.dart';
 
+import '../../common_widget/exercises_row.dart';
 import '../../common_widget/exercises_set_section.dart';
+import '../../model/exercise_model.dart';
+import '../../services/category_workout.dart';
 
 class WorkoutDetailView extends StatefulWidget {
   final Map dObj;
@@ -17,10 +20,15 @@ class WorkoutDetailView extends StatefulWidget {
 }
 
 class _WorkoutDetailViewState extends State<WorkoutDetailView> {
+  final TextEditingController selectedDifficulity = TextEditingController();
+  final WorkoutService _workoutService = WorkoutService();
+  List<Map<String, dynamic>> youArr = [];
+  String selectedDiffDefault = "Beginner";
+
   List latestArr = [
     {
       "image": "assets/img/Workout1.png",
-      "title": "Fullbody Workout",
+      "title": "Full body Workout",
       "time": "Today, 03:00pm"
     },
     {
@@ -30,60 +38,35 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     },
   ];
 
-  List youArr = [
-    {"image": "assets/img/barbell.png", "title": "Barbell"},
-    {"image": "assets/img/skipping_rope.png", "title": "Skipping Rope"},
-    {"image": "assets/img/bottle.png", "title": "Bottle 1 Liters"},
-  ];
+  List<Exercise> exercisesArr = [];
 
-  List exercisesArr = [
-    {
-      "name": "Set 1",
-      "set": [
-        {"image": "assets/img/img_1.png", "title": "Warm Up", "value": "05:00"},
-        {
-          "image": "assets/img/img_2.png",
-          "title": "Jumping Jack",
-          "value": "12x"
-        },
-        {"image": "assets/img/img_1.png", "title": "Skipping", "value": "15x"},
-        {"image": "assets/img/img_2.png", "title": "Squats", "value": "20x"},
-        {
-          "image": "assets/img/img_1.png",
-          "title": "Arm Raises",
-          "value": "00:53"
-        },
-        {
-          "image": "assets/img/img_2.png",
-          "title": "Rest and Drink",
-          "value": "02:00"
-        },
-      ],
-    },
-    {
-      "name": "Set 2",
-      "set": [
-        {"image": "assets/img/img_1.png", "title": "Warm Up", "value": "05:00"},
-        {
-          "image": "assets/img/img_2.png",
-          "title": "Jumping Jack",
-          "value": "12x"
-        },
-        {"image": "assets/img/img_1.png", "title": "Skipping", "value": "15x"},
-        {"image": "assets/img/img_2.png", "title": "Squats", "value": "20x"},
-        {
-          "image": "assets/img/img_1.png",
-          "title": "Arm Raises",
-          "value": "00:53"
-        },
-        {
-          "image": "assets/img/img_2.png",
-          "title": "Rest and Drink",
-          "value": "02:00"
-        },
-      ],
-    }
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadToolOfCategoryWorkout();
+    selectedDifficulity.text = selectedDiffDefault;
+    _loadExercises();
+  }
+
+  void _loadToolOfCategoryWorkout() async {
+    String categoryId = widget.dObj["id"].toString();
+    List<Map<String, dynamic>> tools = await _workoutService.fetchToolsForCategory(categoryId);
+    setState(() {
+      youArr = tools;
+    });
+  }
+
+  void _loadExercises() async {
+    String categoryId = widget.dObj["id"].toString();
+    List<Exercise> exercises = await _workoutService
+        .fetchExercisesByCategoryAndDifficulty(
+      categoryId: categoryId,
+      difficulty: selectedDifficulity.text.trim(),
+    );
+    setState(() {
+      exercisesArr = exercises;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,11 +111,28 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
               expandedHeight: media.width * 0.5,
               flexibleSpace: Align(
                 alignment: Alignment.center,
-                child: Image.asset(
-                  "assets/img/detail_top.png",
+                child: Image.network(
+                  widget.dObj["image"].toString(),
                   width: media.width * 0.75,
                   height: media.width * 0.8,
                   fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(
+                      Icons.error,
+                      color: Colors.red,
+                      size: 90,
+                    );
+                  },
                 ),
               ),
             ),
@@ -179,7 +179,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                       fontWeight: FontWeight.w700),
                                 ),
                                 Text(
-                                  "${widget.dObj["exercises"].toString()} | ${widget.dObj["time"].toString()} | 320 Calories Burn",
+                                  "${widget.dObj["exercises"].toString()} | ${widget.dObj["time"].toString()} | ${widget.dObj["calo"].toString()}",
                                   style: TextStyle(
                                       color: TColor.gray, fontSize: 12),
                                 ),
@@ -191,12 +191,71 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       SizedBox(
                         height: media.width * 0.05,
                       ),
-                      IconTitleNextRow(
-                          icon: "assets/img/difficulity.png",
-                          title: "Difficulity",
-                          time: "Beginner",
-                          color: TColor.secondaryColor2.withOpacity(0.3),
-                          onPressed: () {}),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: TColor.secondaryColor2.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(15)),
+                        child: Row(
+                          children: [
+                            Container(
+                              alignment: Alignment.center,
+                              width: 50,
+                              height: 50,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 15),
+                              child: Image.asset(
+                                "assets/img/difficulity.png",
+                                width: 20,
+                                height: 20,
+                                fit: BoxFit.contain,
+                                color: TColor.gray,
+                              ),
+                            ),
+
+                            Expanded(
+                              child: TextField(
+                                controller: selectedDifficulity,
+                                readOnly: true,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: TColor.black,
+                                ),
+                                decoration: InputDecoration(
+                                  hintText: "Difficulity",
+                                  hintStyle: TextStyle(
+                                      color: TColor.gray, fontSize: 12),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+
+                            DropdownButtonHideUnderline(
+                              child: DropdownButton(
+                                items: ["Beginner", "Normal", "Professional"]
+                                    .map((name) =>
+                                    DropdownMenuItem(
+                                      value: name,
+                                      child: Text(
+                                        name,
+                                        style: TextStyle(
+                                            color: TColor.gray, fontSize: 12),
+                                      ),
+                                    )).toList(),
+                                onChanged: (value) {
+                                  setState(() {
+                                    selectedDifficulity.text = value.toString();
+                                    _loadExercises();
+                                  });
+                                },
+                                icon: Icon(Icons.arrow_drop_down,
+                                    color: TColor.gray),
+                                isExpanded: false,
+                              ),
+                            ),
+
+                            const SizedBox(width: 8),
+                          ],
+                        ),),
                       SizedBox(
                         height: media.width * 0.02,
                       ),
@@ -255,11 +314,28 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                             borderRadius:
                                             BorderRadius.circular(15)),
                                         alignment: Alignment.center,
-                                        child: Image.asset(
+                                        child: Image.network(
                                           yObj["image"].toString(),
                                           width: media.width * 0.2,
                                           height: media.width * 0.2,
                                           fit: BoxFit.contain,
+                                          loadingBuilder: (context, child, loadingProgress) {
+                                            if (loadingProgress == null) return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress.expectedTotalBytes != null
+                                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Icon(
+                                              Icons.error,
+                                              color: Colors.red,
+                                              size: 90,
+                                            );
+                                          },
                                         ),
                                       ),
                                       Padding(
@@ -291,7 +367,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                           TextButton(
                             onPressed: () {},
                             child: Text(
-                              "${youArr.length} Sets",
+                                "${exercisesArr.length.toString()} Exercises",
                               style:
                               TextStyle(color: TColor.gray, fontSize: 12),
                             ),
@@ -299,26 +375,17 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         ],
                       ),
                       ListView.builder(
-                          padding: EdgeInsets.zero,
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: exercisesArr.length,
-                          itemBuilder: (context, index) {
-                            var sObj = exercisesArr[index] as Map? ?? {};
-                            return ExercisesSetSection(
-                              sObj: sObj,
-                              onPressed: (obj) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ExercisesStepDetails(
-                                      eObj: obj,
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          }),
+                        padding: EdgeInsets.zero,
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: exercisesArr.length,
+                        itemBuilder: (context, index) {
+                          Exercise eObj = exercisesArr[index];
+                          return ExercisesRow(
+                            eObj: eObj,
+                          );
+                        },
+                      ),
                       SizedBox(
                         height: media.width * 0.1,
                       ),
@@ -331,7 +398,12 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       RoundButton(title: "Start Workout", onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ReadyView()));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ReadyView(exercises: exercisesArr),
+                          ),
+                        );
                       })
                     ],
                   ),

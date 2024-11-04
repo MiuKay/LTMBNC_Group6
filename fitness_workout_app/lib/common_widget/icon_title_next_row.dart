@@ -38,7 +38,7 @@ class IconTitleNextRow extends StatelessWidget {
             Expanded(
               child: Text(
                 title ,
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(color: TColor.gray, fontSize: 14),
               ),
             ),
             SizedBox(
@@ -46,7 +46,7 @@ class IconTitleNextRow extends StatelessWidget {
               child: Text(
                 time  ,
                 textAlign: TextAlign.right,
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+                style: TextStyle(color: TColor.gray, fontSize: 14),
               ),
             ),
             const SizedBox(width: 8),

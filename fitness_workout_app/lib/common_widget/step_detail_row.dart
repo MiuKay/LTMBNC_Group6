@@ -1,10 +1,12 @@
 import 'package:dotted_dashed_line/dotted_dashed_line.dart';
+import 'package:fitness_workout_app/model/step_exercise_model.dart';
 import 'package:flutter/material.dart';
+import 'package:readmore/readmore.dart';
 
 import '../common/colo_extension.dart';
 
 class StepDetailRow extends StatelessWidget {
-  final Map sObj;
+  final StepExercise sObj;
   final bool isLast;
   const StepDetailRow({super.key, required this.sObj, this.isLast = false});
 
@@ -17,7 +19,7 @@ class StepDetailRow extends StatelessWidget {
         SizedBox(
           width: 25,
           child: Text(
-            sObj["no"].toString(),
+            sObj.step.toString(),
             style: TextStyle(
               color: TColor.secondaryColor1,
               fontSize: 14,
@@ -63,15 +65,25 @@ class StepDetailRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                sObj["title"].toString(),
+                sObj.title.toString(),
                 style: TextStyle(
                   color: TColor.black,
                   fontSize: 14,
                 ),
               ),
-              Text(
-                sObj["detail"].toString(),
-                style: TextStyle(color: TColor.gray, fontSize: 12),
+              ReadMoreText(
+                sObj.detail.toString(),
+                trimLines: 3,
+                colorClickableText: TColor.black,
+                trimMode: TrimMode.Line,
+                trimCollapsedText: ' Read More ...',
+                trimExpandedText: ' Read Less',
+                style: TextStyle(
+                  color: TColor.gray,
+                  fontSize: 12,
+                ),
+                moreStyle:
+                const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               ),
             ],
           ),

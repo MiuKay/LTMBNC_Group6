@@ -176,6 +176,17 @@ class AuthService {
     }
   }
 
+  Future<void> updateUserLevel(String uid, String level) async {
+    try {
+      await _firestore.collection('users').doc(uid).update({
+        'level': level,
+      });
+    } catch (e) {
+      print('Error updating user level: $e');
+      throw e;
+    }
+  }
+
   Future<String> updateUserProfile({
     required String uid,
     required String dateOfBirth,
