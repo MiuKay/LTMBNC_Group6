@@ -1,8 +1,10 @@
+import 'package:fitness_workout_app/services/tips.dart';
 import 'package:fitness_workout_app/view/tips/tips_details_view.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/tip_row.dart';
+import '../../model/tip_model.dart';
 
 class TipsView extends StatefulWidget {
   const TipsView({super.key});
@@ -12,17 +14,22 @@ class TipsView extends StatefulWidget {
 }
 
 class _TipsViewState extends State<TipsView> {
-  List tipsArr = [
-    {"name": "About Traning"},
-    {"name": "How to weight loss ?"},
-    {"name": "Introducing about meal plan "},
-    {"name": "Water and Food"},
-    {"name": "Drink water"},
-    {"name": "How many times a day to eat"},
-    {"name": "Become stronger"},
-    {"name": "Shoes To Training"},
-    {"name": "Appeal Tips"}
-  ];
+  final TipsService _tipService = TipsService();
+  List<Tip> tipArr = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTips();
+  }
+
+  void _loadTips() async {
+    List<Tip> tips = await _tipService.fetchStips();
+    setState(() {
+      tipArr = tips;
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -62,12 +69,12 @@ class _TipsViewState extends State<TipsView> {
       body: ListView.separated(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           itemBuilder: (context, index) {
-            var tObj = tipsArr[index] as Map? ?? {};
+            Tip tObj = tipArr[index];
             return TipRow(
-              tObj: tObj ,
+              tObj: tObj,
               isActive: index == 0,
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => TipsDetailView(tObj: tObj,) ));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => TipsDetailView( stipsObj: tObj) ));
               },
             );
           },
@@ -77,7 +84,7 @@ class _TipsViewState extends State<TipsView> {
               height: 1,
             );
           },
-          itemCount: tipsArr.length),
+          itemCount: tipArr.length),
     );
   }
 }

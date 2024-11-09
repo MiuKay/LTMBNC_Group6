@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
+import '../../services/workout_tracker.dart';
+import '../../model/tip_model.dart';
 
 class TipsDetailView extends StatefulWidget {
-  final Map tObj;
-  const TipsDetailView({super.key, required this.tObj});
+  final Tip stipsObj;
+  const TipsDetailView({super.key, required this.stipsObj});
 
   @override
   State<TipsDetailView> createState() => _TipsDetailViewState();
@@ -50,11 +52,28 @@ class _TipsDetailViewState extends State<TipsDetailView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
+            widget.stipsObj.pic.isNotEmpty
+                ? Image.network(
+              widget.stipsObj.pic,
+              width: media.width,
+              height: media.width * 0.55,
+              fit: BoxFit.contain, // Ensures the image fits without being cut off
+              errorBuilder: (context, error, stackTrace) {
+                // Display a placeholder image from URL if loading fails
+                return Image.asset(
+                    "assets/img/1.png",
+                  width: media.width,
+                  height: media.width * 0.55,
+                  fit: BoxFit.contain,
+                );
+              },
+            )
+                : Image.asset(
+              // Display a placeholder image if `pic` is empty
               "assets/img/1.png",
               width: media.width,
               height: media.width * 0.55,
-              fit: BoxFit.cover,
+              fit: BoxFit.contain,
             ),
             const SizedBox(
               height: 15,
@@ -64,49 +83,24 @@ class _TipsDetailViewState extends State<TipsDetailView> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    widget.tObj["name"],
-                    style: TextStyle(
-                        color: TColor.secondaryText,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700),
+                  Flexible(
+                    child: Text(
+                      widget.stipsObj.name,
+                      style: TextStyle(
+                          color: TColor.secondaryText,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700),
+                      maxLines: 2, // Giới hạn tối đa 2 dòng
+                      overflow: TextOverflow.ellipsis, // Thêm dấu ba chấm nếu vượt quá
+                    ),
                   ),
                 ],
               ),
             ),
-
-
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-              child: Text(
-                "Drink water",
-                style: TextStyle(
-                    color: TColor.secondaryText,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700),
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                "Lore ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget lorem dolor sed viverra ipsum nunc aliquet. Hendrerit ",
-                style: TextStyle(color: TColor.secondaryText, fontSize: 16),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-              child: Text(
-                "Calories",
-                style: TextStyle(
-                    color: TColor.secondaryText,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                "Lore ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\n Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.m ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eget lorem dolor sed viverra ipsum nunc aliquet. Hendrerit ",
+                widget.stipsObj.detail,
                 style: TextStyle(color: TColor.secondaryText, fontSize: 16),
               ),
             ),

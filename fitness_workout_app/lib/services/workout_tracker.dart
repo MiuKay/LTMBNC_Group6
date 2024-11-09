@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import '../model/exercise_model.dart';
 import '../model/step_exercise_model.dart';
+import '../model/tip_model.dart';
 
 class WorkoutService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
