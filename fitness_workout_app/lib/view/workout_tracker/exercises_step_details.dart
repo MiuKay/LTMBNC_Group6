@@ -7,7 +7,7 @@ import '../../common/colo_extension.dart';
 import '../../common_widget/step_detail_row.dart';
 import '../../model/exercise_model.dart';
 import '../../model/step_exercise_model.dart';
-import '../../services/exercises.dart';
+import '../../services/workout_tracker.dart';
 
 class ExercisesStepDetails extends StatefulWidget {
   final Exercise eObj;
@@ -18,7 +18,7 @@ class ExercisesStepDetails extends StatefulWidget {
 }
 
 class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
-  final ExercisesService _stepExercise = ExercisesService();
+  final WorkoutService _workoutService = WorkoutService();
   List<StepExercise> stepArr = [];
   late VideoPlayerController _controller;
   bool _isPlaying = false;
@@ -50,7 +50,7 @@ class _ExercisesStepDetailsState extends State<ExercisesStepDetails> {
 
   void _loadStepExercises() async {
     String name = widget.eObj.name.toString();
-    List<StepExercise> step_exercises = await _stepExercise.fetchStepExercises(
+    List<StepExercise> step_exercises = await _workoutService.fetchStepExercises(
       name: name,
     );
     setState(() {

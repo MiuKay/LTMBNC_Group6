@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import '../../common_widget/exercises_row.dart';
 import '../../common_widget/exercises_set_section.dart';
 import '../../model/exercise_model.dart';
-import '../../services/category_workout.dart';
+import '../../services/workout_tracker.dart';
 
 class WorkoutDetailView extends StatefulWidget {
   final Map dObj;
@@ -39,6 +39,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
   ];
 
   List<Exercise> exercisesArr = [];
+  Map<String, String> listInfo = {};
 
   @override
   void initState() {
@@ -46,6 +47,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     _loadToolOfCategoryWorkout();
     selectedDifficulity.text = selectedDiffDefault;
     _loadExercises();
+    _loadCaloAndTime();
   }
 
   void _loadToolOfCategoryWorkout() async {
@@ -53,6 +55,17 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     List<Map<String, dynamic>> tools = await _workoutService.fetchToolsForCategory(categoryId);
     setState(() {
       youArr = tools;
+    });
+  }
+
+  void _loadCaloAndTime() async {
+    String categoryId = widget.dObj["id"].toString();
+    Map<String, String> list = await _workoutService.fetchTimeAndCalo(
+      categoryId: categoryId,
+      difficulty: selectedDifficulity.text.trim(),
+    );
+    setState(() {
+      listInfo = list;
     });
   }
 
@@ -179,7 +192,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                       fontWeight: FontWeight.w700),
                                 ),
                                 Text(
-                                  "${widget.dObj["exercises"].toString()} | ${widget.dObj["time"].toString()} | ${widget.dObj["calo"].toString()}",
+                                  "${exercisesArr.length.toString()} Exercises | ${listInfo["time"].toString()} | ${listInfo["calo"].toString()}",
                                   style: TextStyle(
                                       color: TColor.gray, fontSize: 12),
                                 ),
@@ -193,16 +206,16 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                            color: TColor.secondaryColor2.withOpacity(0.3),
-                            borderRadius: BorderRadius.circular(15)),
+                          color: TColor.secondaryColor2.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
                         child: Row(
                           children: [
                             Container(
                               alignment: Alignment.center,
                               width: 50,
                               height: 50,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 15),
+                              padding: const EdgeInsets.symmetric(horizontal: 15),
                               child: Image.asset(
                                 "assets/img/difficulity.png",
                                 width: 20,
@@ -213,49 +226,38 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                             ),
 
                             Expanded(
-                              child: TextField(
-                                controller: selectedDifficulity,
-                                readOnly: true,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: TColor.black,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: "Difficulity",
-                                  hintStyle: TextStyle(
-                                      color: TColor.gray, fontSize: 12),
-                                  border: InputBorder.none,
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: selectedDifficulity.text.isNotEmpty ? selectedDifficulity.text : null,
+                                  hint: Text(
+                                    "Difficulty",
+                                    style: TextStyle(color: TColor.gray, fontSize: 12),
+                                  ),
+                                  items: ["Beginner", "Normal", "Professional"]
+                                      .map((name) => DropdownMenuItem(
+                                    value: name,
+                                    child: Text(
+                                      name,
+                                      style: TextStyle(color: TColor.gray, fontSize: 12),
+                                    ),
+                                  ))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedDifficulity.text = value ?? '';
+                                      _loadExercises();
+                                      _loadCaloAndTime();
+                                    });
+                                  },
+                                  icon: Icon(Icons.arrow_drop_down, color: TColor.gray),
                                 ),
                               ),
                             ),
-
-                            DropdownButtonHideUnderline(
-                              child: DropdownButton(
-                                items: ["Beginner", "Normal", "Professional"]
-                                    .map((name) =>
-                                    DropdownMenuItem(
-                                      value: name,
-                                      child: Text(
-                                        name,
-                                        style: TextStyle(
-                                            color: TColor.gray, fontSize: 12),
-                                      ),
-                                    )).toList(),
-                                onChanged: (value) {
-                                  setState(() {
-                                    selectedDifficulity.text = value.toString();
-                                    _loadExercises();
-                                  });
-                                },
-                                icon: Icon(Icons.arrow_drop_down,
-                                    color: TColor.gray),
-                                isExpanded: false,
-                              ),
-                            ),
-
                             const SizedBox(width: 8),
                           ],
-                        ),),
+                        ),
+                      ),
+
                       SizedBox(
                         height: media.width * 0.02,
                       ),

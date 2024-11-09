@@ -15,6 +15,8 @@ class AddScheduleView extends StatefulWidget {
 }
 
 class _AddScheduleViewState extends State<AddScheduleView> {
+  final TextEditingController selectedDifficulty = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -108,10 +110,90 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           const SizedBox(
             height: 12,
           ),
+          Container(
+            decoration: BoxDecoration(
+                color: TColor.lightGray,
+                borderRadius: BorderRadius.circular(15)),
+            child: Row(
+              children: [
+                Container(
+                  alignment: Alignment.center,
+                  width: 50,
+                  height: 50,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15),
+                  child: Image.asset(
+                    "assets/img/difficulity.png",
+                    width: 18,
+                    height: 18,
+                    fit: BoxFit.contain,
+                    color: TColor.gray,
+                  ),
+                ),
+
+                Expanded(
+                  child: TextField(
+                    controller: selectedDifficulty,
+                    readOnly: true,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: TColor.black,
+                    ),
+                    decoration: InputDecoration(
+                      hintText: "Difficulty",
+                      hintStyle: TextStyle(
+                          color: TColor.gray, fontSize: 12),
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+
+                DropdownButtonHideUnderline(
+                  child: DropdownButton(
+                    items: ["Beginner", "Normal", "Professional"]
+                        .map((name) =>
+                        DropdownMenuItem(
+                          value: name,
+                          child: Text(
+                            name,
+                            style: TextStyle(color: TColor.gray,
+                                fontSize: 14),
+                          ),
+                        )).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        selectedDifficulty.text = value.toString();
+                      });
+                    },
+                    icon: SizedBox(
+                      width: 25,
+                      height: 25,
+                      child:  Container(
+                        width: 25,
+                        height: 25,
+                        alignment: Alignment.center,
+                        child: Image.asset(
+                          "assets/img/p_next.png",
+                          width: 12,
+                          height: 12,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    isExpanded: false,
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+              ],
+            ),),
+          const SizedBox(
+            height: 12,
+          ),
           IconTitleNextRow(
-              icon: "assets/img/difficulity.png",
-              title: "Difficulity",
-              time: "Beginner",
+              icon: "assets/img/repetitions.png",
+              title: "Custom Repetitions",
+              time: "",
               color: TColor.lightGray,
               onPressed: () {}),
           Spacer(),

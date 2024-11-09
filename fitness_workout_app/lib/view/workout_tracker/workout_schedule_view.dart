@@ -1,10 +1,12 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common/common.dart';
 import '../../common_widget/round_button.dart';
+import '../../services/workout_tracker.dart';
 import 'add_schedule_view.dart';
 
 class WorkoutScheduleView extends StatefulWidget {
@@ -17,31 +19,30 @@ class WorkoutScheduleView extends StatefulWidget {
 }
 
 class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
-  CalendarAgendaController _calendarAgendaControllerAppBar =
-  CalendarAgendaController();
+  CalendarAgendaController _calendarAgendaControllerAppBar = CalendarAgendaController();
   late DateTime _selectedDateAppBBar;
-
-  List eventArr = [
-    {
-      "name": "Ab Workout",
-      "start_time": "27/10/2024 07:30 AM",
-    },
-    {
-      "name": "Upperbody Workout",
-      "start_time": "28/10/2024 09:00 AM",
-    },
-  ];
-
+  final WorkoutService _workoutService = WorkoutService();
+  List<Map<String, dynamic>> eventArr = [];
   List selectDayEventArr = [];
 
   @override
   void initState() {
     super.initState();
     _selectedDateAppBBar = DateTime.now();
-    setDayEventWorkoutList();
+    _loadWorkOutSchedule();
+    _setDayEventWorkoutList();
   }
 
-  void setDayEventWorkoutList() {
+  void _loadWorkOutSchedule() async {
+    String uid = FirebaseAuth.instance.currentUser!.uid;
+    List<Map<String, dynamic>> schedule = await _workoutService.fetchWorkoutSchedule(userId: uid);
+    setState(() {
+      eventArr = schedule;
+    });
+    _setDayEventWorkoutList();
+  }
+
+  void _setDayEventWorkoutList() {
     var date = dateToStartDate(_selectedDateAppBBar);
     selectDayEventArr = eventArr.map((wObj) {
       return {
@@ -56,7 +57,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
 
     if( mounted  ) {
       setState(() {
-
       });
     }
   }
@@ -137,7 +137,7 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
 
             onDateSelected: (date) {
               _selectedDateAppBBar = date;
-              setDayEventWorkoutList();
+              _setDayEventWorkoutList();
 
             },
             selectedDayLogo: Container(

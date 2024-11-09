@@ -10,7 +10,7 @@ import '../../common_widget/upcoming_workout_row.dart';
 import '../../common_widget/what_train_row.dart';
 import '../../model/user_model.dart';
 import '../../services/auth.dart';
-import '../../services/category_workout.dart';
+import '../../services/workout_tracker.dart';
 import '../main_tab/main_tab_view.dart';
 import 'all_workout_view.dart';
 
@@ -313,17 +313,10 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                             fontSize: 16,
                             fontWeight: FontWeight.w700),
                       ),
-                      TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          "See More",
-                          style: TextStyle(
-                              color: TColor.gray,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700),
-                        ),
-                      )
                     ],
+                  ),
+                  SizedBox(
+                    height: media.width * 0.01,
                   ),
                   ListView.builder(
                       padding: EdgeInsets.zero,
