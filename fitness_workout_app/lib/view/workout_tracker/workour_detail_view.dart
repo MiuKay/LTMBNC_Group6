@@ -52,7 +52,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
 
   void _loadToolOfCategoryWorkout() async {
     String categoryId = widget.dObj["id"].toString();
-    List<Map<String, dynamic>> tools = await _workoutService.fetchToolsForCategory(categoryId);
+    List<Map<String, dynamic>> tools = await _workoutService
+        .fetchToolsForCategory(categoryId);
     setState(() {
       youArr = tools;
     });
@@ -81,9 +82,41 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     });
   }
 
+  void _showDifficultySelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ["Beginner", "Normal", "Professional"].map((difficulty) {
+              return ListTile(
+                title: Text(
+                  difficulty,
+                  style: TextStyle(color: TColor.gray, fontSize: 14),
+                ),
+                onTap: () {
+                  setState(() {
+                    selectedDifficulity.text = difficulty;
+                    _loadExercises();
+                    _loadCaloAndTime();
+                  });
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    var media = MediaQuery.of(context).size;
+    var media = MediaQuery
+        .of(context)
+        .size;
     return Container(
       decoration:
       BoxDecoration(gradient: LinearGradient(colors: TColor.primaryG)),
@@ -134,7 +167,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                     return Center(
                       child: CircularProgressIndicator(
                         value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            ? loadingProgress.cumulativeBytesLoaded /
+                            loadingProgress.expectedTotalBytes!
                             : null,
                       ),
                     );
@@ -192,7 +226,10 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                       fontWeight: FontWeight.w700),
                                 ),
                                 Text(
-                                  "${exercisesArr.length.toString()} Exercises | ${listInfo["time"].toString()} | ${listInfo["calo"].toString()}",
+                                  "${exercisesArr.length
+                                      .toString()} Exercises | ${listInfo["time"]
+                                      .toString()} | ${listInfo["calo"]
+                                      .toString()}",
                                   style: TextStyle(
                                       color: TColor.gray, fontSize: 12),
                                 ),
@@ -204,59 +241,68 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                       SizedBox(
                         height: media.width * 0.05,
                       ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: TColor.secondaryColor2.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              alignment: Alignment.center,
-                              width: 50,
-                              height: 50,
-                              padding: const EdgeInsets.symmetric(horizontal: 15),
-                              child: Image.asset(
-                                "assets/img/difficulity.png",
-                                width: 20,
-                                height: 20,
-                                fit: BoxFit.contain,
-                                color: TColor.gray,
-                              ),
-                            ),
-
-                            Expanded(
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: selectedDifficulity.text.isNotEmpty ? selectedDifficulity.text : null,
-                                  hint: Text(
-                                    "Difficulty",
-                                    style: TextStyle(color: TColor.gray, fontSize: 12),
-                                  ),
-                                  items: ["Beginner", "Normal", "Professional"]
-                                      .map((name) => DropdownMenuItem(
-                                    value: name,
-                                    child: Text(
-                                      name,
-                                      style: TextStyle(color: TColor.gray, fontSize: 12),
-                                    ),
-                                  ))
-                                      .toList(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      selectedDifficulity.text = value ?? '';
-                                      _loadExercises();
-                                      _loadCaloAndTime();
-                                    });
-                                  },
-                                  icon: Icon(Icons.arrow_drop_down, color: TColor.gray),
+                      InkWell(
+                        onTap: () {
+                          _showDifficultySelector(context);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 15),
+                          decoration: BoxDecoration(
+                            color: TColor.primary,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                width: 30,
+                                height: 30,
+                                alignment: Alignment.center,
+                                child: Image.asset(
+                                  "assets/img/difficulity.png",
+                                  width: 16,
+                                  height: 16,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
+
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "Difficulty",
+                                  style: TextStyle(
+                                      color: TColor.gray, fontSize: 12),
+                                ),
+                              ),
+
+                              SizedBox(
+                                width: 120,
+                                child: Text(
+                                  selectedDifficulity.text,
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                      color: TColor.gray, fontSize: 12),
+                                ),
+                              ),
+
+                              // Icon hiển thị ở bên phải
+                              Container(
+                                width: 25,
+                                height: 25,
+                                alignment: Alignment.center,
+                                child: Image.asset(
+                                  "assets/img/p_next.png",
+                                  width: 12,
+                                  height: 12,
+                                  fit: BoxFit.contain,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+
 
                       SizedBox(
                         height: media.width * 0.02,
@@ -267,8 +313,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                           time: "Add to Schedule",
                           color: TColor.primaryColor2.withOpacity(0.3),
                           onPressed: () {
-
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => const WorkoutScheduleView() )  );
+                            Navigator.push(context, MaterialPageRoute(builder: (
+                                context) => const WorkoutScheduleView()));
                           }),
                       SizedBox(
                         height: media.width * 0.05,
@@ -321,17 +367,24 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                                           width: media.width * 0.2,
                                           height: media.width * 0.2,
                                           fit: BoxFit.contain,
-                                          loadingBuilder: (context, child, loadingProgress) {
-                                            if (loadingProgress == null) return child;
+                                          loadingBuilder: (context, child,
+                                              loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
                                             return Center(
                                               child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                value: loadingProgress
+                                                    .expectedTotalBytes != null
+                                                    ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                    loadingProgress
+                                                        .expectedTotalBytes!
                                                     : null,
                                               ),
                                             );
                                           },
-                                          errorBuilder: (context, error, stackTrace) {
+                                          errorBuilder: (context, error,
+                                              stackTrace) {
                                             return Icon(
                                               Icons.error,
                                               color: Colors.red,
@@ -369,7 +422,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                           TextButton(
                             onPressed: () {},
                             child: Text(
-                                "${exercisesArr.length.toString()} Exercises",
+                              "${exercisesArr.length.toString()} Exercises",
                               style:
                               TextStyle(color: TColor.gray, fontSize: 12),
                             ),
@@ -403,7 +456,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ReadyView(exercises: exercisesArr),
+                            builder: (context) =>
+                                ReadyView(exercises: exercisesArr),
                           ),
                         );
                       })

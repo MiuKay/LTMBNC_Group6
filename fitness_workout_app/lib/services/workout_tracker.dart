@@ -13,7 +13,7 @@ class WorkoutService {
       // Fetch all CategoryWorkout documents
       QuerySnapshot categorySnapshot = await _firestore.collection(
           'CategoryWorkout').get();
-      print("Fetched ${categorySnapshot.docs.length} categories.");
+      //print("Fetched ${categorySnapshot.docs.length} categories.");
 
       for (var categoryDoc in categorySnapshot.docs) {
         String categoryId = categoryDoc.id;
@@ -26,7 +26,7 @@ class WorkoutService {
             .where('id_cate', isEqualTo: categoryId)
             .get();
         int exerciseCount = workoutSnapshot.size;
-        print("Category $title has $exerciseCount workouts.");
+        //print("Category $title has $exerciseCount workouts.");
 
         // Collect all unique exercise names for bulk querying
         Set<String> exerciseNames = workoutSnapshot.docs
@@ -41,9 +41,7 @@ class WorkoutService {
             .where('difficulty', isEqualTo: 'Beginner')
             .get();
 
-        print("Fetched ${exerciseSnapshot.docs
-            .length} beginner exercises for category $title.");
-
+        //print("Fetched ${exerciseSnapshot.docs.length} beginner exercises for category $title.");
         // Calculate the total time for all beginner exercises in this category
         int totalTimeInSeconds = 0;
         for (var doc in exerciseSnapshot.docs) {
@@ -91,7 +89,6 @@ class WorkoutService {
     } catch (e) {
       print("Error fetching category workouts: $e");
     }
-
     return categoryWorkoutList;
   }
 
@@ -105,7 +102,7 @@ class WorkoutService {
           .collection('CategoryWorkout')
           .where('level', arrayContains: level)
           .get();
-      print("Fetched ${categorySnapshot.docs.length} categories.");
+      //print("Fetched ${categorySnapshot.docs.length} categories.");
 
       for (var categoryDoc in categorySnapshot.docs) {
         String categoryId = categoryDoc.id;
@@ -118,7 +115,7 @@ class WorkoutService {
             .where('id_cate', isEqualTo: categoryId)
             .get();
         int exerciseCount = workoutSnapshot.size;
-        print("Category $title has $exerciseCount workouts.");
+        //print("Category $title has $exerciseCount workouts.");
 
         // Collect all unique exercise names for bulk querying
         Set<String> exerciseNames = workoutSnapshot.docs
@@ -133,9 +130,7 @@ class WorkoutService {
               .where('difficulty', isEqualTo: 'Beginner')
               .get();
 
-          print("Fetched ${exerciseSnapshot.docs
-              .length} beginner exercises for category $title.");
-
+          //print("Fetched ${exerciseSnapshot.docs.length} beginner exercises for category $title.");
           // Calculate the total time for all beginner exercises in this category
           int totalTimeInSeconds = 0;
           for (var doc in exerciseSnapshot.docs) {
@@ -222,7 +217,6 @@ class WorkoutService {
     } catch (e) {
       print("Error fetching tools: $e");
     }
-
     return toolsList;
   }
 
@@ -234,32 +228,30 @@ class WorkoutService {
 
     try {
       // Bước 1: Truy vấn danh sách Workout dựa trên categoryId và sắp xếp theo ste
-      print("Fetching workouts for category ID: $categoryId");
+      //print("Fetching workouts for category ID: $categoryId");
       QuerySnapshot workoutSnapshot = await _firestore
           .collection('Workout')
           .where('id_cate', isEqualTo: categoryId)
           .orderBy('step')
           .get();
-      print("Fetched ${workoutSnapshot.docs.length} workouts");
+      //print("Fetched ${workoutSnapshot.docs.length} workouts");
 
       // Lấy danh sách các name_exercise duy nhất từ các document của Workout
       List<String> exerciseNames = workoutSnapshot.docs
           .map((doc) => doc['name_exercise'] as String)
           .toSet()
           .toList();
-      print("Unique exercise names extracted: $exerciseNames");
+      //print("Unique exercise names extracted: $exerciseNames");
 
       if (exerciseNames.isNotEmpty) {
         // Bước 2: Truy vấn Exercises với name nằm trong exerciseNames và lọc theo difficulty
-        print(
-            "Fetching exercises with names: $exerciseNames and difficulty: $difficulty");
+        //print("Fetching exercises with names: $exerciseNames and difficulty: $difficulty");
         QuerySnapshot exerciseSnapshot = await _firestore
             .collection('Exercies')
             .where('name', whereIn: exerciseNames)
             .where('difficulty', isEqualTo: difficulty)
             .get();
-        print("Fetched ${exerciseSnapshot.docs
-            .length} exercises matching difficulty: $difficulty");
+        //print("Fetched ${exerciseSnapshot.docs.length} exercises matching difficulty: $difficulty");
 
         // Tạo bản đồ nhanh để tra cứu tài liệu Exercises
         Map<String, Exercise> exerciseMap = {
@@ -301,7 +293,6 @@ class WorkoutService {
           .map((workoutDoc) => workoutDoc['name_exercise'] as String)
           .toSet();
 
-      //if (exerciseNames.isNotEmpty) {
       // Fetch exercises with 'Beginner' difficulty for all collected exercise names in a single query
       QuerySnapshot exerciseSnapshot = await _firestore
           .collection('Exercies')
@@ -456,7 +447,7 @@ class WorkoutService {
     } catch (e) {
       print("Error fetching workout schedule: $e");
     }
-    print("workout schedule: $workoutList");
+    //print("workout schedule: $workoutList");
     return workoutList;
   }
 
@@ -466,7 +457,6 @@ class WorkoutService {
 
     // Tìm chỉ số ngày trong tuần (0 = Monday, 6 = Sunday)
     int targetDayIndex = days.indexOf(day);
-    print("workout schedule: ${currentDate.weekday}");
 
     // Tính số ngày còn lại để đến ngày mong muốn
     int daysToAdd = (targetDayIndex - (currentDate.weekday - 1) + 7) % 7;

@@ -44,7 +44,7 @@ class IconTitleNextRow extends StatelessWidget {
             SizedBox(
               width: 120,
               child: Text(
-                time  ,
+                time,
                 textAlign: TextAlign.right,
                 style: TextStyle(color: TColor.gray, fontSize: 12),
               ),
