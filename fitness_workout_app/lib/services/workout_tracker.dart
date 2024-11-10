@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../model/exercise_model.dart';
 import '../model/step_exercise_model.dart';
 import '../model/tip_model.dart';
+import '../model/workout_schedule_model.dart';
 
 class WorkoutService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -344,17 +345,16 @@ class WorkoutService {
     required String name,
   }) async {
     List<StepExercise> stepExercises = [];
-
     try {
       QuerySnapshot stepExercisesSnapshot = await _firestore
           .collection('Step_exercies')
           .where('name', isEqualTo: name)
           .orderBy('step')
           .get();
-
       // Chuyển đổi mỗi tài liệu thành đối tượng StepExercise và thêm vào danh sách
       for (var stepDoc in stepExercisesSnapshot.docs) {
-        stepExercises.add(StepExercise.fromJson(stepDoc.data() as Map<String, dynamic>));
+        stepExercises.add(
+            StepExercise.fromJson(stepDoc.data() as Map<String, dynamic>));
       }
     } catch (e) {
       print("Error fetching stepExercises: $e");
@@ -367,8 +367,10 @@ class WorkoutService {
   }) async {
     List<Map<String, dynamic>> workoutList = [];
     DateTime endDate = DateTime.now().add(Duration(days: 30));
-    final DateFormat dateFormat = DateFormat('dd/MM/yyyy hh:mm a'); // Định dạng mong muốn
-    final DateFormat hourFormat = DateFormat('hh:mm a'); // Định dạng giờ từ trường hour
+    final DateFormat dateFormat = DateFormat(
+        'dd/MM/yyyy hh:mm a'); // Định dạng mong muốn
+    final DateFormat hourFormat = DateFormat(
+        'hh:mm a'); // Định dạng giờ từ trường hour
 
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -381,7 +383,9 @@ class WorkoutService {
         DateTime startDate = DateFormat('dd/MM/yyyy').parse(doc['day']);
         String name = doc['name'];
         String hour = doc['hour'];
-        DateTime hourTime = hourFormat.parse(hour); // Chuyển chuỗi hour thành DateTime
+        String id = doc['id'];
+        DateTime hourTime = hourFormat.parse(
+            hour); // Chuyển chuỗi hour thành DateTime
 
         if (repeatInterval == "no") {
           // Nếu không có lặp lại, chỉ thêm sự kiện vào ngày đã chỉ định
@@ -392,6 +396,7 @@ class WorkoutService {
           workoutList.add({
             "name": name,
             "start_time": dateFormat.format(eventTime),
+            "id": id,
           });
         }
         else if (repeatInterval == "Everyday") {
@@ -405,8 +410,10 @@ class WorkoutService {
             workoutList.add({
               "name": name,
               "start_time": dateFormat.format(eventTime), // Định dạng thời gian
+              "id": id,
             });
-            currentDate = currentDate.add(Duration(days: 1));  // Tiến tới ngày tiếp theo
+            currentDate =
+                currentDate.add(Duration(days: 1)); // Tiến tới ngày tiếp theo
           }
         }
         else {
@@ -417,25 +424,29 @@ class WorkoutService {
           workoutList.add({
             "name": name,
             "start_time": dateFormat.format(eventTime),
+            "id": id,
           });
 
           List<String> daysOfWeek = repeatInterval.split(',');
           DateTime currentDate = startDate;
 
           // Đảm bảo currentDate là ngày bắt đầu của tuần tính từ startDate
-          currentDate = currentDate.subtract(Duration(days: currentDate.weekday - 1));
+          currentDate =
+              currentDate.subtract(Duration(days: currentDate.weekday - 1));
 
           while (currentDate.isBefore(endDate)) {
             for (var day in daysOfWeek) {
               DateTime eventTime = findNextDateForDay(day, currentDate);
 
               // Kiểm tra nếu eventTime là sau startDate và trước endDate
-              if (eventTime.isAfter(startDate.subtract(Duration(days: 1))) && eventTime.isBefore(endDate)) {
+              if (eventTime.isAfter(startDate.subtract(Duration(days: 1))) &&
+                  eventTime.isBefore(endDate)) {
                 workoutList.add({
                   "name": name,
                   "start_time": dateFormat.format(DateTime(
                       eventTime.year, eventTime.month, eventTime.day,
-                      hourTime.hour, hourTime.minute)), // Định dạng thời gian
+                      hourTime.hour, hourTime.minute)),
+                  "id": id,
                 });
               }
             }
@@ -454,7 +465,15 @@ class WorkoutService {
 
   DateTime findNextDateForDay(String day, DateTime currentDate) {
     // Mảng các ngày trong tuần
-    List<String> days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    List<String> days = [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ];
 
     // Tìm chỉ số ngày trong tuần (0 = Monday, 6 = Sunday)
     int targetDayIndex = days.indexOf(day);
@@ -469,6 +488,189 @@ class WorkoutService {
     return currentDate.add(Duration(days: daysToAdd));
   }
 
+  Future<String> addWorkoutSchedule({
+    required String day,
+    required String difficulty,
+    required String hour,
+    required String name,
+    required String repeatInterval,
+    required String uid,
+  }) async {
+    String res = "Có lỗi gì đó xảy ra";
+    bool notify = true;
+
+    try {
+      // Kiểm tra nếu name hoặc difficulty trống
+      if (name.isEmpty || difficulty.isEmpty) {
+        return ("Error: Name and difficulty must not be empty.");
+      }
+
+      // Chuyển day và hour thành DateTime để kiểm tra trùng lặp và thời gian hợp lệ
+      final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+      final DateFormat hourFormat = DateFormat('hh:mm a');
+
+      DateTime selectedDay = dateFormat.parse(day); // Parse day thành DateTime
+      DateTime selectedHour = hourFormat.parse(
+          hour); // Parse hour thành DateTime
+
+      // Kết hợp ngày và giờ thành một đối tượng DateTime
+      DateTime selectedDateTime = DateTime(
+          selectedDay.year,
+          selectedDay.month,
+          selectedDay.day,
+          selectedHour.hour,
+          selectedHour.minute
+      );
+
+      // Kiểm tra nếu thời gian đã chọn là quá khứ so với thời gian hiện tại
+      if (selectedDateTime.isBefore(DateTime.now())) {
+        return "Error: The selected date and time cannot be in the past.";
+      }
+
+      // Kiểm tra nếu đã có sự kiện trùng lặp trong Firestore
+      bool isDuplicate = await _checkDuplicateEvent(
+          uid, selectedDay, selectedHour);
+      if (isDuplicate) {
+        return "Error: A workout is already scheduled for this day and time.";
+      }
+
+      // Lấy reference đến collection "WorkoutSchedule"
+      CollectionReference workoutScheduleRef = FirebaseFirestore.instance
+          .collection('WorkoutSchedule');
+
+      // Tạo dữ liệu cho lịch tập
+      Map<String, dynamic> workoutData = {
+        'day': day,
+        'difficulty': difficulty,
+        'hour': hour,
+        'name': name,
+        'notify': notify,
+        'repeat_interval': repeatInterval,
+        'uid': uid,
+      };
+
+      // Thêm dữ liệu vào Firestore và lấy document ID
+      DocumentReference docRef = await workoutScheduleRef.add(workoutData);
+
+      // Lấy ID tài liệu được tạo ra từ Firebase
+      String docId = docRef.id;
+
+      // Cập nhật lại tài liệu với ID của tài liệu vào trường 'id'
+      await docRef.update({
+        'id': docId,
+      });
+
+      res = ("success");
+    } catch (e) {
+      return ("Error adding workout schedule: $e");
+    }
+
+    return res;
+  }
+
+  Future<bool> _checkDuplicateEvent(String uid, DateTime day,
+      DateTime hour) async {
+    // Kiểm tra sự kiện trùng lặp trong Firestore với UID và ngày giờ
+    final DateFormat hourFormat = DateFormat('hh:mm a');
+
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('WorkoutSchedule')
+          .where('uid', isEqualTo: uid)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        DateTime eventDay = DateFormat('dd/MM/yyyy').parse(doc['day']);
+        DateTime eventHour = hourFormat.parse(doc['hour']);
+
+        // Kiểm tra nếu có sự kiện trùng lặp với ngày và giờ
+        if (eventDay.isAtSameMomentAs(day) &&
+            eventHour.isAtSameMomentAs(hour)) {
+          return true; // Nếu trùng lặp, trả về true
+        }
+      }
+    } catch (e) {
+      print("Error checking duplicate event: $e");
+    }
+    return false; // Không có sự kiện trùng lặp
+  }
+
+  Future<String> deleteWorkoutSchedule({required String scheduleId}) async {
+    try {
+      // Truy cập đến collection 'WorkoutSchedule' và xoá tài liệu theo id
+      await FirebaseFirestore.instance
+          .collection('WorkoutSchedule')
+          .doc(scheduleId)
+          .delete();
+
+      return ('success');
+    } catch (e) {
+      return ('Error deleting workout schedule: $e');
+    }
+  }
+
+  Future<WorkoutSchedule> getWorkoutScheduleById(
+      {required String scheduleId}) async {
+    //print("Find: $scheduleId");
+    DocumentSnapshot doc = await _firestore.collection("WorkoutSchedule")
+        .doc(scheduleId)
+        .get();
+    return WorkoutSchedule.fromFirestore(doc.data() as Map<String, dynamic>);
+  }
+
+  Future<String> updateSchedule({
+    required String id,
+    required String day,
+    required String difficulty,
+    required String hour,
+    required String name,
+    required String repeatInterval,
+    required String uid,
+  }) async {
+    String res = "Có lỗi gì đó xảy ra";
+
+    try {
+      // Kiểm tra nếu name hoặc difficulty trống
+      if (name.isEmpty || difficulty.isEmpty) {
+        return ("Error: Name and difficulty must not be empty.");
+      }
+      // Chuyển day và hour thành DateTime để kiểm tra trùng lặp và thời gian hợp lệ
+      final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+      final DateFormat hourFormat = DateFormat('hh:mm a');
+      DateTime selectedDay = dateFormat.parse(day); // Parse day thành DateTime
+      DateTime selectedHour = hourFormat.parse(hour); // Parse hour thành DateTime
+      // Kết hợp ngày và giờ thành một đối tượng DateTime
+      DateTime selectedDateTime = DateTime(
+          selectedDay.year,
+          selectedDay.month,
+          selectedDay.day,
+          selectedHour.hour,
+          selectedHour.minute
+      );
+      // Kiểm tra nếu thời gian đã chọn là quá khứ so với thời gian hiện tại
+      if (selectedDateTime.isBefore(DateTime.now())) {
+        return "Error: The selected date and time cannot be in the past.";
+      }
+      // Kiểm tra nếu đã có sự kiện trùng lặp trong Firestore
+      bool isDuplicate = await _checkDuplicateEvent(
+          uid, selectedDay, selectedHour);
+      if (isDuplicate) {
+        return "Error: A workout is already scheduled for this day and time.";
+      }
+      // Cập nhật lại tài liệu với ID của tài liệu vào trường 'id'
+      await _firestore.collection('WorkoutSchedule').doc(id).update({
+        'difficulty': difficulty,
+        'hour': hour,
+        'name': name,
+        'repeat_interval': repeatInterval,
+      });
+
+      res = ("success");
+    } catch (e) {
+      return ("Error updating workout schedule: $e");
+    }
+    return res;
+  }
 }
 
 

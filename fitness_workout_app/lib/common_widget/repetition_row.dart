@@ -42,6 +42,35 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
 
   bool isEveryday = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _initializeRepetitions();
+  }
+
+  // Hàm này sẽ được gọi để khởi tạo giá trị dựa trên dữ liệu đã truyền vào
+  void _initializeRepetitions() {
+    String repetition = widget.repetitionController.text;
+
+    if (repetition == "Everyday") {
+      isEveryday = true;
+      selectedDays.updateAll((key, value) => true);  // Chọn tất cả các ngày
+    } else if (repetition == "no") {
+      isEveryday = false;
+      selectedDays.updateAll((key, value) => false);  // Hủy chọn tất cả các ngày
+    } else {
+      isEveryday = false;
+      // Nếu là chuỗi các ngày, tách và đánh dấu những ngày tương ứng
+      List<String> daysList = repetition.split(",");
+      for (String day in daysList) {
+        if (selectedDays.containsKey(day)) {
+          selectedDays[day] = true;
+        }
+      }
+    }
+    setState(() {});
+  }
+
   void _showRepetitionSelector(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -64,10 +93,9 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
                           isEveryday = value ?? false;
                           if (isEveryday) {
                             selectedDays.updateAll((key, value) => true);
-                          }else{
+                          } else {
                             selectedDays.updateAll((key, value) => false);
                           }
-
                         });
                         _updateRepetition();
                       },
@@ -124,7 +152,7 @@ class _RepetitionsRowState extends State<RepetitionsRow> {
       });
       repetition = selectedDaysList.join(",");
     }
-    if (repetition ==  ""){
+    if (repetition == "") {
       repetition = "no";
     }
     // Lưu giá trị vào controller

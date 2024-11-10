@@ -70,17 +70,11 @@ class _UpcomingWorkoutRowState extends State<UpcomingWorkoutRow> {
                     height: 20,
                   ),
                   onSelected: (value) {
-                    if (value == 'edit') {
-                      // Hành động Edit
-                    } else if (value == 'remove') {
+                    if (value == 'remove') {
                       // Hành động Remove
                     }
                   },
                   itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                    const PopupMenuItem<String>(
-                      value: 'edit',
-                      child: Text('Edit'),
-                    ),
                     const PopupMenuItem<String>(
                       value: 'remove',
                       child: Text('Remove'),

@@ -9,17 +9,18 @@ import '../../common/common.dart';
 import '../../common_widget/icon_title_next_row.dart';
 import '../../common_widget/repetition_row.dart';
 import '../../common_widget/round_button.dart';
+import '../../model/workout_schedule_model.dart';
 import '../../services/workout_tracker.dart';
 
-class AddScheduleView extends StatefulWidget {
-  final DateTime date;
-  const AddScheduleView({super.key, required this.date});
+class EditScheduleView extends StatefulWidget {
+  final WorkoutSchedule schedule;
+  const EditScheduleView({super.key, required this.schedule});
 
   @override
-  State<AddScheduleView> createState() => _AddScheduleViewState();
+  State<EditScheduleView> createState() => _EditScheduleViewState();
 }
 
-class _AddScheduleViewState extends State<AddScheduleView> {
+class _EditScheduleViewState extends State<EditScheduleView> {
   final WorkoutService _workoutService = WorkoutService();
   final TextEditingController selectedDifficulty = TextEditingController();
   final TextEditingController selectedWorkout = TextEditingController();
@@ -27,13 +28,20 @@ class _AddScheduleViewState extends State<AddScheduleView> {
   String day = "";
   String hour = "";
   bool isLoading = false;
+  DateTime? parsedDay;
+  DateTime? parsedHour;
 
   @override
   void initState() {
     super.initState();
-    selectedRepetition.text = "no";
-    day = dateToString(widget.date, formatStr: "d/M/yyyy");
-    hour = dateToString(DateTime.now(), formatStr: "h:mm a");
+    // Gán giá trị cho các TextEditingController sau khi có lịch tập
+    selectedWorkout.text = widget.schedule.name;
+    selectedDifficulty.text = widget.schedule.difficulty;
+    selectedRepetition.text = widget.schedule.repeatInterval;
+    day = widget.schedule.day;
+    hour = widget.schedule.hour;
+    parsedDay = DateFormat("d/M/yyyy").parse(widget.schedule.day);
+    parsedHour = DateFormat("h:mm a").parse(widget.schedule.hour);
   }
 
   @override
@@ -44,35 +52,24 @@ class _AddScheduleViewState extends State<AddScheduleView> {
     selectedRepetition.dispose();
   }
 
-  void _onTimeChanged(DateTime newDate) {
-    setState(() {
-      // Lấy giờ và phút từ DateTime và định dạng lại
-      hour = DateFormat('h:mm a').format(newDate);
-      ;
-    });
-  }
-
-  void _handleAddSchedule() async {
+  void _handleUpdateSchedule() async {
     try {
       setState(() {
         isLoading = true;
       });
       String uid = FirebaseAuth.instance.currentUser!.uid;
-      String res = await _workoutService.addWorkoutSchedule(
+      String res = await _workoutService.updateSchedule(
+          id: widget.schedule.id,
           day: day,
           difficulty: selectedDifficulty.text.trim(),
           hour: hour,
           name: selectedWorkout.text.trim(),
           repeatInterval: selectedRepetition.text.trim(),
           uid: uid);
-
-
       if (res == "success") {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Workout schedule added successfully')));
-
+            SnackBar(content: Text('Workout schedule updating successfully')));
         Navigator.pop(context, true);
-
         setState(() {
           isLoading = false;
         });
@@ -91,6 +88,14 @@ class _AddScheduleViewState extends State<AddScheduleView> {
         isLoading = false;
       });
     }
+  }
+
+  void _onTimeChanged(DateTime newDate) {
+    setState(() {
+      // Lấy giờ và phút từ DateTime và định dạng lại
+      hour = DateFormat('h:mm a').format(newDate);
+      ;
+    });
   }
 
   @override
@@ -154,7 +159,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           ),
         ),
         title: Text(
-          "Add Schedule",
+          "Edit Schedule",
           style: TextStyle(
               color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
         ),
@@ -177,7 +182,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                     width: 12,
                   ),
                   Text(
-                    dateToString(widget.date, formatStr: "E, dd MMMM yyyy"),
+                    dateToString(parsedDay as DateTime, formatStr: "E, dd MMMM yyyy"),
                     style: TextStyle(color: TColor.gray, fontSize: 15),
                   ),
                 ],
@@ -196,7 +201,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                 height: media.width * 0.35,
                 child: CupertinoDatePicker(
                   onDateTimeChanged: _onTimeChanged,
-                  initialDateTime: DateTime.now(),
+                  initialDateTime: parsedHour,
                   use24hFormat: false,
                   minuteInterval: 1,
                   mode: CupertinoDatePickerMode.time,
@@ -309,7 +314,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
               Spacer(),
               RoundButton(
                   title: "Save",
-                  onPressed: _handleAddSchedule),
+                  onPressed: _handleUpdateSchedule),
               const SizedBox(
                 height: 20,
               ),
