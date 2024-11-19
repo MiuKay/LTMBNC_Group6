@@ -5,6 +5,7 @@ import '../../common_widget/notification_row.dart';
 
 class NotificationView extends StatefulWidget {
   const NotificationView({super.key});
+  static const route = '/notification-screen';
 
   @override
   State<NotificationView> createState() => _NotificationViewState();
@@ -22,6 +23,7 @@ class _NotificationViewState extends State<NotificationView> {
 
   @override
   Widget build(BuildContext context) {
+    final message = ModalRoute.of(context)!.settings.arguments;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: TColor.white,
@@ -54,14 +56,22 @@ class _NotificationViewState extends State<NotificationView> {
         ),
       ),
       backgroundColor: TColor.white,
-      body: ListView.separated(
-          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
-          itemBuilder: ((context, index) {
-            var nObj = notificationArr[index] as Map? ?? {};
-            return NotificationRow(nObj: nObj);
-          }), separatorBuilder: (context, index){
-        return Divider(color: TColor.gray.withOpacity(0.5), height: 1, );
-      }, itemCount: notificationArr.length),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('${message}'),
+          ],
+        ),
+      )
+      // ListView.separated(
+      //     padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
+      //     itemBuilder: ((context, index) {
+      //       var nObj = notificationArr[index] as Map? ?? {};
+      //       return NotificationRow(nObj: nObj);
+      //     }), separatorBuilder: (context, index){
+      //   return Divider(color: TColor.gray.withOpacity(0.5), height: 1, );
+      // }, itemCount: notificationArr.length),
     );
   }
 }

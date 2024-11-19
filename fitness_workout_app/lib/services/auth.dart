@@ -3,12 +3,15 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
+import 'package:intl/intl.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
+import 'notification.dart';
 
 class AuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final NotificationServices notificationServices = NotificationServices();
 
   Future<String> signupUser({
     required String email,
@@ -100,6 +103,65 @@ class AuthService {
         email: email,
         password: password,
       );
+
+      // Lấy lịch từ collection WorkoutSchedule của người dùng
+      var workoutScheduleSnapshot = await _firestore
+          .collection('WorkoutSchedule')
+          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+// Duyệt qua các lịch và lên lịch lại thông báo
+      for (var workoutScheduleDoc in workoutScheduleSnapshot.docs) {
+        bool notify = workoutScheduleDoc['notify']; // Kiểm tra trường notify
+
+        // Nếu notify là false, bỏ qua và không làm gì
+        if (!notify) {
+          continue; // Bỏ qua tài liệu này và tiếp tục với tài liệu tiếp theo
+        }
+
+        var workoutId = workoutScheduleDoc['id']; // Lấy ID của lịch
+        var hour = workoutScheduleDoc['hour'];
+        var day = workoutScheduleDoc['day'];
+        var title = workoutScheduleDoc['name']; // Tiêu đề workout
+        var repeatInterval = workoutScheduleDoc['repeat_interval']; // Lấy thời gian lặp lại
+
+        final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+        final DateFormat hourFormat = DateFormat('hh:mm a');
+        DateTime selectedDay = dateFormat.parse(day);
+        DateTime selectedHour = hourFormat.parse(hour);
+
+        DateTime selectedDateTime = DateTime(
+          selectedDay.year,
+          selectedDay.month,
+          selectedDay.day,
+          selectedHour.hour,
+          selectedHour.minute,
+        );
+
+        // Kiểm tra nếu lịch là trong quá khứ và không phải lịch lặp lại
+        if (selectedDateTime.isBefore(DateTime.now()) && repeatInterval == 'no') {
+          // Nếu thời gian lên lịch đã qua và không phải lịch lặp lại, bỏ qua lịch này
+          continue;
+        }
+
+        // Lên lịch lại thông báo dựa trên thông tin từ Firestore
+        String id_notify = await notificationServices.scheduleWorkoutNotification(
+          id: workoutId,
+          scheduledTime: selectedDateTime,
+          workoutName: title,
+          repeatInterval: repeatInterval,
+        );
+
+        // Cập nhật trường id_notify trong tài liệu của collection WorkoutSchedule
+        await _firestore
+            .collection('WorkoutSchedule')
+            .doc(workoutScheduleDoc.id) // Lấy ID tài liệu để cập nhật
+            .update({
+          'id_notify': id_notify, // Cập nhật id_notify với giá trị đã lấy
+        });
+
+        print('Notification ID updated for workout ${workoutScheduleDoc.id}');
+      }
 
       res = "success";
 

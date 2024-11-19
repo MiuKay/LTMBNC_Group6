@@ -6,13 +6,15 @@ import '../../model/exercise_model.dart';
 
 class ReadyView extends StatelessWidget {
   final List<Exercise> exercises;
+  final String historyId;
+  final int index;
 
-  const ReadyView({Key? key, required this.exercises}) : super(key: key);
+  const ReadyView({Key? key, required this.exercises, required this.historyId, required this.index}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TimerModel>(
-      create: (context) => TimerModel(context, exercises), // Truyền exercises vào TimerModel
+      create: (context) => TimerModel(context, exercises, historyId, index), // Truyền exercises vào TimerModel
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Center(
@@ -42,7 +44,7 @@ class ReadyView extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     child: Text(
-                      "Next: ${exercises.isNotEmpty ? exercises[0].name : 'No Exercise'}",
+                      "Next: ${exercises.isNotEmpty ? exercises[index].name : 'No Exercise'}",
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -58,9 +60,11 @@ class ReadyView extends StatelessWidget {
 
 class TimerModel with ChangeNotifier {
   final List<Exercise> exercises;
+  final String historyId;
+  final int index;
   int countdown = 5;
 
-  TimerModel(context, this.exercises) {
+  TimerModel(context, this.exercises, this.historyId, this.index) {
     MyTimer(context);
   }
 
@@ -74,7 +78,8 @@ class TimerModel with ChangeNotifier {
           MaterialPageRoute(
             builder: (context) => WorkOutDet(
               exercises: exercises, // Truyền danh sách exercises
-              index: 0, // Truyền chỉ số ban đầu
+              index: index,
+              historyId: historyId,// Truyền chỉ số ban đầu
             ),
           ),
         );

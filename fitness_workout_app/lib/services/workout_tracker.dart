@@ -4,9 +4,11 @@ import '../model/exercise_model.dart';
 import '../model/step_exercise_model.dart';
 import '../model/tip_model.dart';
 import '../model/workout_schedule_model.dart';
+import 'notification.dart';
 
 class WorkoutService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final NotificationServices notificationServices = NotificationServices();
 
   Future<List<Map<String, dynamic>>> fetchCategoryWorkoutList() async {
     List<Map<String, dynamic>> categoryWorkoutList = [];
@@ -334,7 +336,7 @@ class WorkoutService {
       }
       // Store the result in the map
       data['time'] = "$totalTimeInMinutes Mins";
-      data['calo'] = "$totalCalo Calories Burned";
+      data['calo'] = "$totalCalo Calo Burned";
     } catch (e) {
       print("Error fetching category workouts: $e");
     }
@@ -497,29 +499,25 @@ class WorkoutService {
     required String uid,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
-    bool notify = true;
+
 
     try {
       // Kiểm tra nếu name hoặc difficulty trống
       if (name.isEmpty || difficulty.isEmpty) {
         return ("Error: Name and difficulty must not be empty.");
       }
-
-      // Chuyển day và hour thành DateTime để kiểm tra trùng lặp và thời gian hợp lệ
+      // Chuyển đổi chuỗi ngày và giờ thành DateTime
       final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
       final DateFormat hourFormat = DateFormat('hh:mm a');
+      DateTime selectedDay = dateFormat.parse(day);
+      DateTime selectedHour = hourFormat.parse(hour);
 
-      DateTime selectedDay = dateFormat.parse(day); // Parse day thành DateTime
-      DateTime selectedHour = hourFormat.parse(
-          hour); // Parse hour thành DateTime
-
-      // Kết hợp ngày và giờ thành một đối tượng DateTime
       DateTime selectedDateTime = DateTime(
-          selectedDay.year,
-          selectedDay.month,
-          selectedDay.day,
-          selectedHour.hour,
-          selectedHour.minute
+        selectedDay.year,
+        selectedDay.month,
+        selectedDay.day,
+        selectedHour.hour,
+        selectedHour.minute,
       );
 
       // Kiểm tra nếu thời gian đã chọn là quá khứ so với thời gian hiện tại
@@ -534,35 +532,36 @@ class WorkoutService {
         return "Error: A workout is already scheduled for this day and time.";
       }
 
-      // Lấy reference đến collection "WorkoutSchedule"
-      CollectionReference workoutScheduleRef = FirebaseFirestore.instance
-          .collection('WorkoutSchedule');
-
-      // Tạo dữ liệu cho lịch tập
+      // Lưu vào Firestore
+      CollectionReference workoutScheduleRef = FirebaseFirestore.instance.collection('WorkoutSchedule');
       Map<String, dynamic> workoutData = {
         'day': day,
         'difficulty': difficulty,
         'hour': hour,
         'name': name,
-        'notify': notify,
         'repeat_interval': repeatInterval,
         'uid': uid,
       };
 
-      // Thêm dữ liệu vào Firestore và lấy document ID
       DocumentReference docRef = await workoutScheduleRef.add(workoutData);
 
-      // Lấy ID tài liệu được tạo ra từ Firebase
-      String docId = docRef.id;
 
-      // Cập nhật lại tài liệu với ID của tài liệu vào trường 'id'
+      // Đặt lịch thông báo
+      String id_notify = await notificationServices.scheduleWorkoutNotification(
+        id: docRef.id,
+        scheduledTime: selectedDateTime,
+        workoutName: name,
+        repeatInterval: repeatInterval,
+      );
+
       await docRef.update({
-        'id': docId,
+        'id': docRef.id,
+        'id_notify': id_notify,
       });
 
-      res = ("success");
+      res = "success";
     } catch (e) {
-      return ("Error adding workout schedule: $e");
+      return "Error adding workout schedule: $e";
     }
 
     return res;
@@ -570,7 +569,6 @@ class WorkoutService {
 
   Future<bool> _checkDuplicateEvent(String uid, DateTime day,
       DateTime hour) async {
-    // Kiểm tra sự kiện trùng lặp trong Firestore với UID và ngày giờ
     final DateFormat hourFormat = DateFormat('hh:mm a');
 
     try {
@@ -611,7 +609,6 @@ class WorkoutService {
 
   Future<WorkoutSchedule> getWorkoutScheduleById(
       {required String scheduleId}) async {
-    //print("Find: $scheduleId");
     DocumentSnapshot doc = await _firestore.collection("WorkoutSchedule")
         .doc(scheduleId)
         .get();
@@ -671,6 +668,174 @@ class WorkoutService {
     }
     return res;
   }
+
+  Future<String> createEmptyWorkoutHistory({
+    required String uid,
+    required String idCate,
+    required List<Exercise> exercisesArr,
+    required String difficulty,
+  }) async {
+    final historyData = {
+      'uid': uid,
+      'id_cate': idCate,
+      'exercisesArr': exercisesArr.map((e) => e.toFirestore()).toList(),
+      'index': 0,
+      'duration': 0,
+      'caloriesBurned': 0,
+      'completedAt': null,
+      'difficulty': difficulty,
+    };
+
+    // Lưu vào Firestore (hoặc MongoDB tùy vào cấu trúc database của bạn)
+    final docRef = await FirebaseFirestore.instance
+        .collection('WorkoutHistory')
+        .add(historyData);
+
+    await FirebaseFirestore.instance
+        .collection('WorkoutHistory')
+        .doc(docRef.id)
+        .update({
+      'id': docRef.id,
+    });
+
+    return docRef.id; // Trả về workoutId
+  }
+
+  Future<void> updateWorkoutHistory({
+    required String historyId,
+    required int index,
+    required int duration,
+    required int caloriesBurned,
+    required DateTime completedAt,
+  }) async {
+    final collection = FirebaseFirestore.instance.collection('WorkoutHistory');
+
+    // Lấy dữ liệu hiện tại của lịch sử
+    final historyDoc = await collection.doc(historyId).get();
+
+    final data = historyDoc.data();
+
+    // Lấy tổng thời gian và calo đã lưu trước đó
+    int previousTotalTime = data?['duration'] ?? 0;
+    int previousTotalCalo = data?['caloriesBurned'] ?? 0;
+
+    // print('calo: $previousTotalCalo');
+    // print('time: $previousTotalTime');
+
+    // Cộng dồn thời gian và calo
+    int newTotalTime = previousTotalTime + duration;
+    int newTotalCalo = previousTotalCalo + caloriesBurned;
+
+    // print('New calo: $newTotalCalo');
+    // print('New time: $newTotalTime');
+
+    await FirebaseFirestore.instance
+        .collection('WorkoutHistory')
+        .doc(historyId)
+        .update({
+      'index': index,
+      'duration': newTotalTime,
+      'caloriesBurned': newTotalCalo,
+      'completedAt': completedAt,
+    });
+  }
+
+  Future<Map<String, int>> getWorkoutHistory({
+    required String historyId,
+  }) async {
+    final collection = FirebaseFirestore.instance.collection('WorkoutHistory');
+
+    try {
+      // Lấy dữ liệu từ Firestore bằng historyId
+      final historyDoc = await collection.doc(historyId).get();
+
+      // Kiểm tra nếu tài liệu tồn tại
+      if (historyDoc.exists) {
+        final data = historyDoc.data();
+
+        // Lấy giá trị caloriesBurned và duration từ dữ liệu
+        int caloriesBurned = data?['caloriesBurned'] ?? 0;
+        int duration = data?['duration'] ?? 0;
+
+        return {
+          'caloriesBurned': caloriesBurned,
+          'duration': duration,
+        };
+      } else {
+        // Trường hợp không tìm thấy tài liệu
+        print('No workout history found for the given ID');
+        return {
+          'caloriesBurned': 0,
+          'duration': 0,
+        };
+      }
+    } catch (e) {
+      print('Error fetching workout history: $e');
+      return {
+        'caloriesBurned': 0,
+        'duration': 0,
+      };
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchWorkoutHistory({
+    required String uid,
+  }) async {
+    List<Map<String, dynamic>> resultList = [];
+
+    try {
+      // Lấy danh sách tài liệu từ WorkoutHistory theo uid
+      QuerySnapshot workoutSnapshot = await FirebaseFirestore.instance
+          .collection('WorkoutHistory')
+          .where('uid', isEqualTo: uid)
+          .orderBy('completedAt', descending: true)
+          .get();
+
+      for (var doc in workoutSnapshot.docs) {
+        final historyData = doc.data() as Map<String, dynamic>;
+
+        // Lấy thông tin từ id_cate trong CategoryWorkout
+        String idCate = historyData['id_cate'];
+        DocumentSnapshot categorySnapshot = await FirebaseFirestore.instance
+            .collection('CategoryWorkout')
+            .doc(idCate)
+            .get();
+
+        final categoryData = categorySnapshot.data() as Map<String, dynamic>?;
+
+        final Map<String, String> list = await fetchTimeAndCalo(
+          categoryId: idCate,
+          difficulty: historyData['difficulty'],
+        );
+
+        // Chuyển đổi exercisesArr từ List<dynamic> thành List<Exercise>
+        List<Exercise> exercisesArr = (historyData['exercisesArr'] as List)
+            .map((exercise) => Exercise.fromFirestore(exercise))
+            .toList();
+
+        // Tính toán 'process'
+        int index = historyData['index'] ?? 0;
+        double progress = exercisesArr.isNotEmpty ? ((index + 1) / exercisesArr.length) : 0.0;
+
+        // Thêm vào danh sách kết quả
+        resultList.add({
+          'id': doc.id,
+          'name': categoryData?['name'] ?? 'No Name',
+          'image': categoryData?['pic'] ?? '',
+          'index': index,
+          'progress': progress,
+          'exercisesArr': exercisesArr,
+          'calo': historyData['caloriesBurned'] ?? 0,
+          'time': (historyData['duration']! / 60) ?? 0,
+        });
+      }
+    } catch (e) {
+      print('Error fetching workout history: $e');
+    }
+    return resultList;
+  }
+
+
 }
 
 

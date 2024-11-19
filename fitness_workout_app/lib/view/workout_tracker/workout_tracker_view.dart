@@ -1,5 +1,9 @@
+import 'dart:math';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
+import 'package:fitness_workout_app/view/workout_tracker/all_history_workout_view.dart';
+import 'package:fitness_workout_app/view/workout_tracker/ready_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workour_detail_view.dart';
 import 'package:fitness_workout_app/view/workout_tracker/workout_schedule_view.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -8,6 +12,7 @@ import 'package:flutter/material.dart';
 import '../../common_widget/round_button.dart';
 import '../../common_widget/upcoming_workout_row.dart';
 import '../../common_widget/what_train_row.dart';
+import '../../common_widget/workout_row.dart';
 import '../../model/user_model.dart';
 import '../../services/auth.dart';
 import '../../services/workout_tracker.dart';
@@ -37,13 +42,16 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
     },
   ];
 
+  List<Map<String, dynamic>> lastWorkoutArr = [];
+
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _loadCategoryWorkoutsWithLevel();
+    _loadHistoryWorkout();
   }
 
-  Future<void> _loadCategoryWorkoutsWithLevel() async {
+  void _loadCategoryWorkoutsWithLevel() async {
     UserModel? user = await AuthService().getUserInfo(
         FirebaseAuth.instance.currentUser!.uid);
     if (user != null) {
@@ -58,6 +66,14 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
         SnackBar(content: Text('Có lỗi xảy ra')),
       );
     }
+  }
+
+  void _loadHistoryWorkout() async {
+    List<Map<String, dynamic>> lastWorkout = await _workoutService.fetchWorkoutHistory(
+        uid:FirebaseAuth.instance.currentUser!.uid);
+    setState(() {
+      lastWorkoutArr = lastWorkout;
+    });
   }
 
   void getUserInfo() async {
@@ -327,6 +343,55 @@ class _WorkoutTrackerViewState extends State<WorkoutTrackerView> {
                         var wObj = latestArr[index] as Map? ?? {};
                         return UpcomingWorkoutRow(wObj: wObj);
                       }),
+                  if (lastWorkoutArr.isNotEmpty) ...[
+                    // Nếu lastWorkoutArr không rỗng, hiển thị các widget dưới đây
+                    SizedBox(
+                      height: media.width * 0.05,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Latest Workout",
+                          style: TextStyle(
+                            color: TColor.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AllHistoryWorkoutView(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "See More",
+                            style: TextStyle(
+                              color: TColor.gray,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    ListView.builder(
+                      padding: EdgeInsets.zero,
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: lastWorkoutArr.length.clamp(0, 2), // Hiển thị tối đa 2 phần tử
+                      itemBuilder: (context, index) {
+                        var wObj = lastWorkoutArr[index] as Map? ?? {};
+                        return InkWell(
+                          child: WorkoutRow(wObj: wObj),
+                        );
+                      },
+                    )
+                  ],
                   SizedBox(
                     height: media.width * 0.05,
                   ),
