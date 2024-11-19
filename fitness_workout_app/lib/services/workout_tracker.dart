@@ -499,7 +499,7 @@ class WorkoutService {
     required String uid,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
-
+    bool notify = true;
 
     try {
       // Kiểm tra nếu name hoặc difficulty trống
@@ -541,6 +541,7 @@ class WorkoutService {
         'name': name,
         'repeat_interval': repeatInterval,
         'uid': uid,
+        'notify': notify,
       };
 
       DocumentReference docRef = await workoutScheduleRef.add(workoutData);
