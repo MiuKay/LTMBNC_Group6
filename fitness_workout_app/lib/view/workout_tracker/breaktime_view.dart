@@ -3,22 +3,24 @@ import 'package:fitness_workout_app/view/workout_tracker/workout_start_view.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../model/exercise_model.dart';
-import '../home/finished_workout_view.dart';
+import 'finished_workout_view.dart';
 
 class BreakTime extends StatelessWidget {
   final List<Exercise> exercises;
   final int index;
+  final String historyId;
 
   const BreakTime({
     Key? key,
     required this.exercises,
     required this.index,
+    required this.historyId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TimerModelSec>(
-      create: (context) => TimerModelSec(context, 10, exercises, index),
+      create: (context) => TimerModelSec(context, 10, exercises, index, historyId),
       child: Scaffold(
         body: Container(
           height: MediaQuery.of(context).size.height,
@@ -78,6 +80,7 @@ class BreakTime extends StatelessWidget {
                                 builder: (context) => WorkOutDet(
                                   exercises: exercises,
                                   index: index - 1,
+                                  historyId: historyId,
                                 ),
                               ),
                             );
@@ -103,6 +106,7 @@ class BreakTime extends StatelessWidget {
                                 builder: (context) => WorkOutDet(
                                   exercises: exercises,
                                   index: index,
+                                  historyId: historyId,
                                 ),
                               ),
                             );
@@ -123,7 +127,7 @@ class BreakTime extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                   child: Text(
-                    "Next: ${index != exercises.length - 1 ? exercises[index].name : 'Finish'}",
+                    "Next: ${index != exercises.length ? exercises[index].name : 'Finish'}",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -142,12 +146,12 @@ class TimerModelSec with ChangeNotifier {
   bool isPassed = false;
   Timer? _timer;
 
-  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises, int index)
+  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises, int index, String historyId)
       : countdown = initialTime {
-    _startTimer(context, exercises, index);
+    _startTimer(context, exercises, index, historyId);
   }
 
-  void _startTimer(BuildContext context, List<Exercise> exercises, int index) {
+  void _startTimer(BuildContext context, List<Exercise> exercises, int index, String historyId) {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (!visible && !isPassed) {  // Đếm ngược nếu không tạm dừng hoặc chuyển bài
         countdown--;
@@ -160,14 +164,14 @@ class TimerModelSec with ChangeNotifier {
             // Nếu đây là bài tập cuối cùng, chuyển đến FinishedWorkoutView
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => FinishedWorkoutView()),
+              MaterialPageRoute(builder: (context) => FinishedWorkoutView(historyId: historyId,)),
             );
           } else {
             // Nếu còn bài tập tiếp theo, chuyển đến BreakTime
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => WorkOutDet(exercises: exercises, index: index),
+                builder: (context) => WorkOutDet(exercises: exercises, index: index, historyId: historyId,),
               ),
             );
           }

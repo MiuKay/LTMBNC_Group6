@@ -98,40 +98,40 @@ class _EditScheduleViewState extends State<EditScheduleView> {
     });
   }
 
+  void _showDifficultySelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ["Beginner", "Normal", "Professional"].map((
+                difficulty) {
+              return ListTile(
+                title: Text(
+                  difficulty,
+                  style: TextStyle(color: TColor.gray, fontSize: 14),
+                ),
+                onTap: () {
+                  setState(() {
+                    selectedDifficulty.text = difficulty;
+                  });
+                  Navigator.pop(context);
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery
         .of(context)
         .size;
-
-    void _showDifficultySelector(BuildContext context) {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: ["Beginner", "Normal", "Professional"].map((
-                  difficulty) {
-                return ListTile(
-                  title: Text(
-                    difficulty,
-                    style: TextStyle(color: TColor.gray, fontSize: 14),
-                  ),
-                  onTap: () {
-                    setState(() {
-                      selectedDifficulty.text = difficulty;
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              }).toList(),
-            ),
-          );
-        },
-      );
-    }
 
     return Scaffold(
       appBar: AppBar(

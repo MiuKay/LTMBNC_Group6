@@ -7,6 +7,7 @@ class WorkoutSchedule {
   final String difficulty;
   final bool notify;
   final String repeatInterval;
+  final String id_notify;
 
   WorkoutSchedule({
     required this.id,
@@ -17,6 +18,7 @@ class WorkoutSchedule {
     required this.difficulty,
     required this.notify,
     required this.repeatInterval,
+    required this.id_notify,
   });
 
   // Phương thức chuyển đổi từ Map (JSON) sang đối tượng WorkoutSchedule
@@ -30,6 +32,7 @@ class WorkoutSchedule {
       difficulty: data['difficulty'],
       notify: data['notify'],
       repeatInterval: data['repeat_interval'],
+      id_notify: data['id_notify'],
     );
   }
 
@@ -44,6 +47,7 @@ class WorkoutSchedule {
       'difficulty': difficulty,
       'notify': notify,
       'repeat_interval': repeatInterval,
+      'id_notify': id_notify,
     };
   }
 }

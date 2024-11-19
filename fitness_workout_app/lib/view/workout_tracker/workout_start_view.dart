@@ -5,24 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:fitness_workout_app/view/workout_tracker/breaktime_view.dart';
 import 'package:provider/provider.dart';
 import '../../model/exercise_model.dart';
-import '../home/finished_workout_view.dart';
+import '../../services/workout_tracker.dart';
+import 'finished_workout_view.dart';
 
 class WorkOutDet extends StatelessWidget {
   final List<Exercise> exercises;
   final int index;
+  final String historyId;
 
   const WorkOutDet({
     Key? key,
     required this.exercises,
     required this.index,
+    required this.historyId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final currentExercise = exercises[index];
+    final WorkoutService _workoutService = WorkoutService();
 
     return ChangeNotifierProvider<TimerModelSec>(
-      create: (context) => TimerModelSec(context, currentExercise.time, exercises, index),
+      create: (context) => TimerModelSec(context, currentExercise.time, exercises, index, historyId),
       child: Scaffold(
         backgroundColor: Colors.white,
         body: Stack(
@@ -100,14 +104,29 @@ class WorkOutDet extends StatelessWidget {
                           builder: (context, myModel, child) {
                             return TextButton(
                               onPressed: () async {
-                                myModel.Pass();
+                                // Tính toán thời gian thực tế và lượng calo
+                                final currentExercise = exercises[index];
+                                final realTime = currentExercise.time - myModel.countdown; // Thời gian thực tế
+                                final caloriesBurned = (realTime * currentExercise.calo) ~/ currentExercise.time; // Tính calo
+
+                                // Cập nhật lịch sử trước khi chuyển bài
+                                await _workoutService.updateWorkoutHistory(
+                                  historyId: historyId,
+                                  index: index,
+                                  duration: realTime,
+                                  caloriesBurned: caloriesBurned,
+                                  completedAt: DateTime.now(),
+                                );
+
+                                myModel.Pass(); // Dừng bộ đếm thời gian
                                 await Future.delayed(Duration(seconds: 1));
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => BreakTime(
                                       exercises: exercises,
-                                      index: index - 1,
+                                      index: index,
+                                      historyId: historyId,
                                     ),
                                   ),
                                 );
@@ -124,15 +143,30 @@ class WorkOutDet extends StatelessWidget {
                           builder: (context, myModel, child) {
                             return TextButton(
                               onPressed: () async {
-                                myModel.Pass();
+                                // Tính toán thời gian thực tế và lượng calo
+                                final currentExercise = exercises[index];
+                                final realTime = currentExercise.time - myModel.countdown; // Thời gian thực tế
+                                final caloriesBurned = (realTime * currentExercise.calo) ~/ currentExercise.time; // Tính calo
+
+                                // Cập nhật lịch sử trước khi chuyển bài
+                                await _workoutService.updateWorkoutHistory(
+                                  historyId: historyId,
+                                  index: index,
+                                  duration: realTime,
+                                  caloriesBurned: caloriesBurned,
+                                  completedAt: DateTime.now(),
+                                );
+
+                                myModel.Pass(); // Dừng bộ đếm thời gian
                                 await Future.delayed(Duration(seconds: 1));
+
                                 // Kiểm tra nếu đây là bài tập cuối cùng
                                 if (index == exercises.length - 1) {
                                   // Nếu là bài tập cuối cùng, điều hướng đến FinishedWorkoutView
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => FinishedWorkoutView(),
+                                      builder: (context) => FinishedWorkoutView(historyId: historyId,),
                                     ),
                                   );
                                 } else {
@@ -143,6 +177,7 @@ class WorkOutDet extends StatelessWidget {
                                       builder: (context) => BreakTime(
                                         exercises: exercises,
                                         index: index + 1,
+                                        historyId: historyId,
                                       ),
                                     ),
                                   );
@@ -215,7 +250,7 @@ class WorkOutDet extends StatelessWidget {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => ReadyView(exercises: exercises),
+                                              builder: (context) => ReadyView(exercises: exercises, index: 0, historyId: historyId,),
                                             ),
                                           );
                                         },
@@ -253,13 +288,27 @@ class WorkOutDet extends StatelessWidget {
                                         child: Text("Không"),
                                       ),
                                       TextButton(
-                                        onPressed: () {
+                                        onPressed: () async {
+                                          // Tính toán thời gian thực tế và lượng calo
+                                          final currentExercise = exercises[index];
+                                          final realTime = currentExercise.time - myModel.countdown; // Thời gian thực tế
+                                          final caloriesBurned = (realTime * currentExercise.calo) ~/ currentExercise.time; // Tính calo
+
+                                          // Cập nhật lịch sử trước khi chuyển bài
+                                          await _workoutService.updateWorkoutHistory(
+                                            historyId: historyId,
+                                            index: index,
+                                            duration: realTime,
+                                            caloriesBurned: caloriesBurned,
+                                            completedAt: DateTime.now(),
+                                          );
+
                                           // Nếu người dùng nhấn "Có", điều hướng đến WorkoutTrackerView
                                           Navigator.of(context).pop(); // Đóng hộp thoại trước
                                           Navigator.pushReplacement(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => const WorkoutTrackerView(),
+                                              builder: (context) => FinishedWorkoutView(historyId: historyId),
                                             ),
                                           );
                                         },
@@ -303,35 +352,51 @@ class TimerModelSec with ChangeNotifier {
   bool visible = false;
   bool isPassed = false;
   Timer? _timer;
+  final String historyId;
+  final WorkoutService _workoutService = WorkoutService();
 
-  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises, int index) : countdown = initialTime {
+  TimerModelSec(BuildContext context, int initialTime, List<Exercise> exercises, int index, this.historyId) : countdown = initialTime {
     _startTimer(context, exercises, index);
   }
 
   void _startTimer(BuildContext context, List<Exercise> exercises, int index) {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!visible && !isPassed) {  // Đếm ngược nếu không tạm dừng hoặc chuyển bài
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!visible && !isPassed) {
         countdown--;
         notifyListeners();
 
         if (countdown <= 0) {
           timer.cancel();
 
-          if (index >= exercises.length - 1) {
-            // Nếu đây là bài tập cuối cùng, chuyển đến FinishedWorkoutView
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => FinishedWorkoutView()),
-            );
-          } else {
-            // Nếu còn bài tập tiếp theo, chuyển đến BreakTime
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BreakTime(exercises: exercises, index: index + 1),
-              ),
-            );
-          }
+          // Cập nhật lịch sử tập luyện sau khi hoàn thành bài tập
+          final exercise = exercises[index];
+          _workoutService.updateWorkoutHistory(
+            historyId: historyId,
+            index: index,
+            duration: exercise.time,
+            caloriesBurned: exercise.calo,
+            completedAt: DateTime.now(),
+          ).then((_) {
+            if (index >= exercises.length - 1) {
+              // Nếu là bài tập cuối cùng, chuyển đến FinishedWorkoutView
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => FinishedWorkoutView(historyId: historyId,)),
+              );
+            } else {
+              // Chuyển đến bài tập tiếp theo
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BreakTime(
+                    exercises: exercises,
+                    index: index + 1,
+                    historyId: historyId,
+                  ),
+                ),
+              );
+            }
+          });
         }
       } else if (isPassed) {
         timer.cancel();

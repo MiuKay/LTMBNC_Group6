@@ -2,6 +2,8 @@ import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 
+import '../view/workout_tracker/ready_view.dart';
+
 class WorkoutRow extends StatelessWidget {
   final Map wObj;
   const WorkoutRow({super.key, required this.wObj});
@@ -20,11 +22,28 @@ class WorkoutRow extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(30),
-              child: Image.asset(
+              child: Image.network(
                 wObj["image"].toString(),
                 width: 60,
                 height: 60,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.error,
+                    color: Colors.red,
+                    size: 60,
+                  );
+                },
               ),
             ),
 
@@ -41,7 +60,8 @@ class WorkoutRow extends StatelessWidget {
                     ),
 
                     Text(
-                      "${ wObj["kcal"].toString() } Calories Burn | ${wObj["time"].toString()}minutes",
+                      "${ (wObj["index"] + 1).toString() }/${ wObj["exercisesArr"].length.toString() } Ex | "
+                          "${ wObj["calo"].toString() } Calo Burned | ${wObj["time"].toStringAsFixed(2)} Mins",
                       style: TextStyle(
                         color: TColor.gray,
                         fontSize: 10,),
@@ -68,7 +88,58 @@ class WorkoutRow extends StatelessWidget {
                   ],
                 )),
             IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  // Kiểm tra xem người dùng đã hoàn thành bài tập chưa
+                  if (wObj["exercisesArr"].length - 1 == wObj["index"]) {
+                    // Hiện thông báo bạn đã hoàn thành bài tập
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text("Hoàn thành"),
+                        content:
+                        const Text("Bạn đã hoàn thành toàn bộ bài tập!"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("OK"),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else {
+                    // Hiện thông báo bạn muốn tiếp tục bài tập này không
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text("Tiếp tục bài tập"),
+                        content: const Text("Bạn muốn tiếp tục bài tập này không?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text("Không"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Đóng dialog
+                              // Điều hướng đến màn hình ReadyView
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ReadyView(
+                                    exercises: wObj["exercisesArr"],
+                                    historyId: wObj["id"],
+                                    index: wObj["index"],
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Text("Có"),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
                 icon: Image.asset(
                   "assets/img/next_icon.png",
                   width: 30,

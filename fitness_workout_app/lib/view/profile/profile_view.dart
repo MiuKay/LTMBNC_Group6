@@ -13,6 +13,7 @@ import 'package:fitness_workout_app/model/user_model.dart';
 import '../../services/auth.dart';
 import '../setting/PrivacyPolicy_and_TermOfUse_View.dart';
 import '../setting/select_language_view.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class ProfileView extends StatefulWidget {
   final UserModel user;
@@ -24,6 +25,7 @@ class ProfileView extends StatefulWidget {
 class _ProfileViewState extends State<ProfileView> {
   bool positive = false;
   bool darkmode = false;
+  final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
@@ -41,6 +43,7 @@ class _ProfileViewState extends State<ProfileView> {
             ),
             TextButton(
               onPressed: () async {
+                await _localNotifications.cancelAll();
                 await AuthService().logOut();
                 Navigator.push(
                     context,
