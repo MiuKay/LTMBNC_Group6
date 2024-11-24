@@ -11,7 +11,9 @@ const UserScreen = () => {
         { key: 'gender', label: 'Gender' },
         { key: 'weight', label: 'Weight' },
         { key: 'height', label: 'Height' },
-        { key: 'level', label: 'Level' }
+        { key: 'level', label: 'Level' },
+        { key: 'pic', label: 'Picture  ' }
+
     ];
 
     // Customize the GenericScreen component with additional props

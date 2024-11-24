@@ -38,7 +38,7 @@ export default function App() {
                                 headerShown: true,
                                 drawerType: Platform.OS === 'web' ? 'permanent' : 'front',
                                 drawerStyle: {
-                                    width: Platform.OS === 'web' ? 280 : '75%',
+                                    width: '75%',
                                     backgroundColor: '#f5f5f5',
                                 },
                                 headerStyle: {
