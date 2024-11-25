@@ -31,8 +31,6 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/exercises", exerciseRoutes);
 app.use("/api/v1/stepExercises", stepExerciseRoutes);
 app.use("/api/v1/tips", tipRoutes);
-app.use("/api/v1/workoutSchedules", workoutScheduleRoutes);
-
 // Khởi tạo port cho ứng dụng
 const PORT = process.env.PORT || 5000;
 

@@ -6,10 +6,10 @@ const exerciseSchema = new mongoose.Schema({
     descriptions: { type: String, required: true, default: "" },
     difficulty: { type: String, required: true, default: "" },
     name: { type: String, required: true, default: "" },
-    pic: { type: String, required: true, default: "" },
+    pic: { type: String, default: "" },
     rep: { type: Number, required: true, default: 0 },
     time: { type: Number, required: true, default: 0 },
-    video: { type: String, required: true, default: "" },
+    video: { type: String, default: "" },
 });
 
 // Phương thức tĩnh để chuyển đổi từ JSON thành đối tượng Exercise

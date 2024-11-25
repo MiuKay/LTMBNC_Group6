@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const tipSchema = new mongoose.Schema({
     detail: { type: String, required: true, default: "" },
     name: { type: String, required: true, default: "" },
-    pic: { type: String, required: true, default: "" },
+    pic: { type: String, default: "" },
 });
 
 // Phương thức tĩnh để chuyển đổi từ JSON (Firestore document) sang Tip

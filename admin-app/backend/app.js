@@ -10,7 +10,6 @@ const userRoutes = require('./routes/userRoutes');
 const exerciseRoutes = require('./routes/exerciseRoutes');
 const stepExerciseRoutes = require('./routes/stepExerciseRoutes');
 const tipRoutes = require('./routes/tipRoutes');
-const workoutScheduleRoutes = require('./routes/workoutScheduleRoutes');
 
 // Khởi tạo ứng dụng Express
 var app = express();
@@ -36,7 +35,6 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/exercises', exerciseRoutes);
 app.use('/api/v1/stepExercises', stepExerciseRoutes);
 app.use('/api/v1/tips', tipRoutes);
-app.use('/api/v1/workoutSchedules', workoutScheduleRoutes);
 
 // Catch 404 errors và chuyển tới handler lỗi
 app.use(function(req, res, next) {
