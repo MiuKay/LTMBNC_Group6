@@ -38,10 +38,10 @@ router.put('/:id', async (req, res) => {
         const stepExercise = await StepExercise.findById(req.params.id);
         if (!stepExercise) return res.status(404).json({ message: 'Step Exercise not found' });
     
-        stepExercise.name = req.body.name || stepExercise.name;
-        stepExercise.step = req.body.step || stepExercise.step;
-        stepExercise.title = req.body.title || stepExercise.title;
-        stepExercise.detail = req.body.detail || stepExercise.detail;
+        stepExercise.name = req.body.name ?? stepExercise.name;
+        stepExercise.step = req.body.step ?? stepExercise.step;
+        stepExercise.title = req.body.title ?? stepExercise.title;
+        stepExercise.detail = req.body.detail ?? stepExercise.detail;
     
         const updatedStepExercise = await stepExercise.save();
         res.json(updatedStepExercise); // Send back the updated step exercise
@@ -63,6 +63,17 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-
+router.get('/:name', async (req, res) => {
+    try {
+        const name = req.params.name;
+    
+        const stepExercises = await StepExercise.find({ name: name }).sort('step');
+    
+        res.json(stepExercises);
+    } catch (err) {
+        console.error("Error fetching step exercises:", err);
+        res.status(500).json({ message: "Error fetching step exercises" });
+    }
+});
 
 module.exports = router;

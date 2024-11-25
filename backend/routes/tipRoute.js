@@ -37,9 +37,9 @@ router.put('/:id', async (req, res) => {
         const tip = await Tip.findById(req.params.id);
         if (!tip) return res.status(404).json({ message: 'Tip not found' });
     
-        tip.detail = req.body.detail || tip.detail;
-        tip.name = req.body.name || tip.name;
-        tip.pic = req.body.pic || tip.pic;
+        tip.detail = req.body.detail ?? tip.detail;
+        tip.name = req.body.name ?? tip.name;
+        tip.pic = req.body.pic ?? tip.pic;    
     
         const updatedTip = await tip.save();
         res.json(updatedTip); // Send back the updated tip
@@ -51,13 +51,13 @@ router.put('/:id', async (req, res) => {
 // Delete a tip by ID
 router.delete('/:id', async (req, res) => {
     try {
-    const tip = await Tip.findById(req.params.id);
-    if (!tip) return res.status(404).json({ message: 'Tip not found' });
+        const tip = await Tip.findById(req.params.id);
+        if (!tip) return res.status(404).json({ message: 'Tip not found' });
 
-    await tip.remove();
-    res.json({ message: 'Tip deleted' });
+        await tip.remove();
+        res.json({ message: 'Tip deleted' });
     } catch (err) {
-    res.status(500).json({ message: err.message });
+        res.status(500).json({ message: err.message });
     }
 });
 

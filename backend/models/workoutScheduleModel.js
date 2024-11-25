@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 // Định nghĩa schema cho WorkoutSchedule
 const workoutScheduleSchema = new mongoose.Schema({
-    id: {type: String, required: true,},
+    _id: {type: String, required: true,},
     uid: {type: String, required: true,},
     name: {type: String, required: true,},
     day: {type: String, required: true,},
