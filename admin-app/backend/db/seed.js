@@ -18,8 +18,8 @@ mongoose
 
 // Dữ liệu mẫu cho User
 const userSamples = [
-    { fname: "John", lname: "Doe", email: "johndoe@example.com", dateOfBirth: "15/08/1990", gender: "Male", weight: "70", height: "175", level: "Intermediate" },
-    { fname: "Jane", lname: "Smith", email: "janesmith@example.com", dateOfBirth: "20/05/1992", gender: "Female", weight: "60", height: "165", level: "Beginner" },
+    { fname: "John", lname: "Doe", email: "johndoe@example.com", dateOfBirth: "15/08/1990", gender: "male", weight: "70", height: "175", level: "Lean & Tone" },
+    { fname: "Jane", lname: "Smith", email: "janesmith@example.com", dateOfBirth: "20/05/1992", gender: "female", weight: "60", height: "165", level: "Improve Shape" },
 ];
 
 // Dữ liệu mẫu cho Exercise
@@ -42,7 +42,7 @@ const tipSamples = [
 
 // Dữ liệu mẫu cho CategoryWorkout
 const categoryWorkoutSamples = [
-    { level: ["Lose a Fat"], name: "Full body" },
+    { level: ["Lose a Fat","Lean & Tone"], name: "Full body" },
     { level: ["Lean & Tone"], name: "Upper body" },
     { level: ["Improve Shape"], name: "Lower body" },
 ];
@@ -56,9 +56,9 @@ const toolsSamples = [
 
 // Dữ liệu mẫu cho Workout
 const workoutSamples = [
-    { id_cate: "6744809ca4ae83d73d115444", name_exercise: "Push-ups", step: 1 },
-    { id_cate: "6744809ca4ae83d73d115444", name_exercise: "Squats", step: 1 },
-    { id_cate: "6744809ca4ae83d73d115443", name_exercise: "Lunges", step: 1 },
+    { id_cate: "1", name_exercise: "Push-ups", step: 1 },
+    { id_cate: "2", name_exercise: "Squats", step: 1 },
+    { id_cate: "3", name_exercise: "Lunges", step: 1 },
 ];
 
 // Hàm lưu dữ liệu mẫu vào MongoDB
@@ -99,14 +99,14 @@ const seedData = async () => {
         const be4delWorkouts = await WorkoutModel.find();
         console.log("Before delete Workouts:", be4delWorkouts);
 
-        // Bước 1: Xóa một CategoryWorkout
-        const categoryToDelete = categories[1]; // Lấy category đầu tiên
+/*         // Bước 1: Xóa một CategoryWorkout
+        const categoryToDelete = categories[2]; // Lấy category đầu tiên
         await CategoryWorkout.findByIdAndDelete(categoryToDelete._id); // Xóa CategoryWorkout
         console.log(`CategoryWorkout with id ${categoryToDelete.id} deleted`);
 
         // Bước 2: Tìm và xóa các Workout có id_cate tương ứng
         await WorkoutModel.deleteMany({ id_cate: categoryToDelete.id }); // Xóa các Workout
-        console.log(`Del workouts with id_cate: ${categoryToDelete.id}`);
+        console.log(`Del workouts with id_cate: ${categoryToDelete.id}`); */
 
         // Kiểm tra các Workout còn lại
         const remainingWorkouts = await WorkoutModel.find();

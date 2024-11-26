@@ -3,9 +3,10 @@ import GenericScreen from '../components/GenericScreen';
 
 const StepExerciseScreen = () => {
     const fields = [
-        { key: 'exerciseId', label: 'Exercise ID' },
-        { key: 'stepNumber', label: 'Step Number' },
-        { key: 'description', label: 'Description' },
+        { key: 'title', label: 'Title' },
+        { key: 'step', label: 'Step' },
+        { key: 'name', label: 'Name' },
+        { key: 'detail', label: 'Detail' },
     ];
 
     return (

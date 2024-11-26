@@ -11,7 +11,9 @@ import UserScreen from './screens/UserScreen';
 import ExerciseScreen from './screens/ExerciseScreen';
 import StepExerciseScreen from './screens/StepExerciseScreen';
 import TipScreen from './screens/TipScreen';
-import WorkoutScheduleScreen from './screens/WorkoutScheduleScreen';
+import WorkoutScreen from './screens/WorkoutScreen';
+import CategoryWorkoutScreen from './screens/CategoryWorkoutScreen';
+import ToolScreen from './screens/ToolScreen';
 
 const Drawer = createDrawerNavigator();
 const queryClient = new QueryClient();
@@ -97,14 +99,36 @@ export default function App() {
                                 }}
                             />
                             <Drawer.Screen
-                                name="Workout Schedules"
-                                component={WorkoutScheduleScreen}
+                                name="Workouts"
+                                component={WorkoutScreen}
                                 options={{
-                                    headerTitle: "Quản lý lịch tập",
+                                    headerTitle: "Quản lý nội dung buổi tập",
                                     drawerIcon: ({ color }) => (
-                                        <Ionicons name="calendar-outline" size={24} color={color} />
+                                        <Ionicons name="barbell-outline" size={24} color={color} />
                                     ),
-                                    drawerLabel: "Lịch tập"
+                                    drawerLabel: "Buổi tập"
+                                }}
+                            />
+                            <Drawer.Screen
+                                name="Category Workouts"
+                                component={CategoryWorkoutScreen}
+                                options={{
+                                    headerTitle: "Quản lý danh mục buổi tập",
+                                    drawerIcon: ({ color }) => (
+                                        <Ionicons name="list-outline" size={24} color={color} />
+                                    ),
+                                    drawerLabel: "Danh mục buổi tập"
+                                }}
+                            />
+                            <Drawer.Screen
+                                name="Tools"
+                                component={ToolScreen}
+                                options={{
+                                    headerTitle: "Quản lý công cụ",
+                                    drawerIcon: ({ color }) => (
+                                        <Ionicons name="construct-outline" size={24} color={color} />
+                                    ),
+                                    drawerLabel: "Công cụ"
                                 }}
                             />
                         </Drawer.Navigator>

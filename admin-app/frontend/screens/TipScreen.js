@@ -3,9 +3,9 @@ import GenericScreen from '../components/GenericScreen';
 
 const TipScreen = () => {
     const fields = [
-        { key: 'title', label: 'Title' },
-        { key: 'content', label: 'Content' },
-        { key: 'category', label: 'Category' },
+        { key: 'name', label: 'Name' },
+        { key: 'detail', label: 'Detail' },
+        { key: 'pic', label: 'Picture' },
     ];
 
     return (

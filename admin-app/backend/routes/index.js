@@ -24,13 +24,19 @@ const userRoutes = require("./userRoutes");
 const exerciseRoutes = require("./exerciseRoutes");
 const stepExerciseRoutes = require("./stepExerciseRoutes");
 const tipRoutes = require("./tipRoutes");
-const workoutScheduleRoutes = require("./workoutScheduleRoutes");
+const categoryWorkoutRoutes = require("./categoryWorkoutRoutes");
+const toolRoutes = require("./toolRoutes");
+const workoutRoutes = require("./workoutRoutes");
 
 // Sử dụng các routes
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/exercises", exerciseRoutes);
 app.use("/api/v1/stepExercises", stepExerciseRoutes);
 app.use("/api/v1/tips", tipRoutes);
+app.use("/api/v1/categoryWorkouts", categoryWorkoutRoutes);
+app.use("/api/v1/tools", toolRoutes);
+app.use("/api/v1/workouts", workoutRoutes);
+
 // Khởi tạo port cho ứng dụng
 const PORT = process.env.PORT || 5000;
 

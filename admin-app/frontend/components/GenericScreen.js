@@ -9,7 +9,8 @@ import {
     Dimensions,
     StatusBar,
     KeyboardAvoidingView,
-    ScrollView
+    ScrollView,
+    Alert
 } from 'react-native';
 import {
     Text,
@@ -115,6 +116,9 @@ const GenericScreen = ({
             case 'weight':
             case 'height':
                 return !isNaN(value) && value > 0 ? '' : 'Giá trị phải lớn hơn 0';
+            case 'pic':
+            case 'video':
+                return '';
             default:
                 return value?.trim() ? '' : 'Trường này là bắt buộc';
         }
@@ -137,8 +141,10 @@ const GenericScreen = ({
     const handleSave = async () => {
         const errors = {};
         fields.forEach(field => {
-            const error = validateField(field.key, formData[field.key]);
-            if (error) errors[field.key] = error;
+            if (field.key !== 'uid') {
+                const error = validateField(field.key, formData[field.key]);
+                if (error) errors[field.key] = error;
+            }
         });
 
         if (Object.keys(errors).length > 0) {
@@ -168,16 +174,31 @@ const GenericScreen = ({
     };
 
     const handleDelete = async (id) => {
-        try {
-            await deleteMutation.mutateAsync(id);
-            await refetch();
-            setSnackbarMessage('Xóa thành công');
-        } catch (error) {
-            console.error(error);
-            setSnackbarMessage('Có lỗi xảy ra');
-        } finally {
-            setSnackbarVisible(true);
-        }
+        Alert.alert(
+            "Xác nhận xóa",
+            "Bạn có chắc chắn muốn xóa mục này?",
+            [
+                {
+                    text: "Hủy",
+                    style: "cancel"
+                },
+                {
+                    text: "Xóa",
+                    onPress: async () => {
+                        try {
+                            await deleteMutation.mutateAsync(id);
+                            await refetch();
+                            setSnackbarMessage('Xóa thành công');
+                        } catch (error) {
+                            console.error(error);
+                            setSnackbarMessage('Có lỗi xảy ra');
+                        } finally {
+                            setSnackbarVisible(true);
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const renderItem = ({ item }) => (
@@ -233,6 +254,26 @@ const GenericScreen = ({
                                 { value: 'male', label: 'Nam' },
                                 { value: 'female', label: 'Nữ' },
                                 { value: 'other', label: 'Khác' }
+                            ]}
+                            style={styles.segmentedButtons}
+                        />
+                        {error && <Text style={styles.errorText}>{error}</Text>}
+                    </View>
+                );
+            case 'level':
+                return (
+                    <View key={field.key} style={styles.formField}>
+                        <Text style={styles.fieldLabel}>{field.label}</Text>
+                        <SegmentedButtons
+                            value={formData[field.key] || ''}
+                            onValueChange={(value) => setFormData(prev => ({
+                                ...prev, 
+                                [field.key]: value
+                            }))}
+                            buttons={[
+                                { value: 'Lean & Tone', label: 'Lean & Tone' },
+                                { value: 'Improve Shape', label: 'Improve Shape' },
+                                { value: 'Lose a Fat', label: 'Lose a Fat' }
                             ]}
                             style={styles.segmentedButtons}
                         />
@@ -307,6 +348,42 @@ const GenericScreen = ({
                             {error && <Text style={styles.errorText}>{error}</Text>}
                         </View>
                     );
+            case 'uid':
+                return (
+                    <View key={field.key} style={styles.formField}>
+                        <TextInput
+                            label={field.label}
+                            value={formData[field.key] || ''}
+                            onChangeText={(text) => setFormData(prev => ({
+                                ...prev, 
+                                [field.key]: text
+                            }))}
+                            error={!!error}
+                            style={styles.input}
+                            mode="outlined"
+                            editable={false}
+                        />
+                        {error && <Text style={styles.errorText}>{error}</Text>}
+                    </View>
+                );
+            case 'pic':
+            case 'video':
+                return (
+                    <View key={field.key} style={styles.formField}>
+                        <TextInput
+                            label={field.label}
+                            value={formData[field.key] || ''}
+                            onChangeText={(text) => setFormData(prev => ({
+                                ...prev, 
+                                [field.key]: text
+                            }))}
+                            error={!!error}
+                            style={styles.input}
+                            mode="outlined"
+                        />
+                        {error && <Text style={styles.errorText}>{error}</Text>}
+                    </View>
+                );
             default:
                 return (
                     <View key={field.key} style={styles.formField}>
