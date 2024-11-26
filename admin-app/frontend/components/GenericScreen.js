@@ -103,7 +103,7 @@ const GenericScreen = ({
             case 'email':
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return emailRegex.test(value) ? '' : 'Email không hợp lệ';
-                case 'dateOfBirth':
+                case 'date_of_birth':
                     if (!value) return 'Trường này là bắt buộc';
                     
                     // Kiểm tra định dạng dd/mm/yyyy
@@ -326,7 +326,7 @@ const GenericScreen = ({
                         {error && <Text style={styles.errorText}>{error}</Text>}
                     </View>
                 );
-                case 'dateOfBirth':
+                case 'date_of_birth':
                     return (
                         <View key={field.key} style={styles.formField}>
                             <TextInput

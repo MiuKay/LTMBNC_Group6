@@ -18,8 +18,8 @@ mongoose
 
 // Dữ liệu mẫu cho User
 const userSamples = [
-    { fname: "John", lname: "Doe", email: "johndoe@example.com", dateOfBirth: "15/08/1990", gender: "male", weight: "70", height: "175", level: "Lean & Tone" },
-    { fname: "Jane", lname: "Smith", email: "janesmith@example.com", dateOfBirth: "20/05/1992", gender: "female", weight: "60", height: "165", level: "Improve Shape" },
+    { fname: "John", lname: "Doe", email: "johndoe@example.com", date_of_birth: "15/08/1990", gender: "male", weight: "70", height: "175", level: "Lean & Tone" },
+    { fname: "Jane", lname: "Smith", email: "janesmith@example.com", date_of_birth: "20/05/1992", gender: "female", weight: "60", height: "165", level: "Improve Shape" },
 ];
 
 // Dữ liệu mẫu cho Exercise

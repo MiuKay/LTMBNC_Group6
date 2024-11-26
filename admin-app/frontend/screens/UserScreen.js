@@ -7,7 +7,7 @@ const UserScreen = () => {
         { key: 'fname', label: 'First Name' },
         { key: 'lname', label: 'Last Name' },
         { key: 'email', label: 'Email' },
-        { key: 'dateOfBirth', label: 'Date of Birth' },
+        { key: 'date_of_birth', label: 'Date of Birth' },
         { key: 'gender', label: 'Gender' },
         { key: 'weight', label: 'Weight' },
         { key: 'height', label: 'Height' },

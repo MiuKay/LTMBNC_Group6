@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     fname: { type: String, required: true },
     lname: { type: String, required: true },
     email: { type: String, required: true },
-    dateOfBirth: { type: String, required: true },
+    date_of_birth: { type: String, required: true },
     gender: { type: String, required: true },
     weight: { type: String, required: true },
     height: { type: String, required: true },
@@ -25,11 +25,11 @@ const userSchema = new mongoose.Schema({
 
 // Hàm tính tuổi từ ngày sinh
 userSchema.methods.getAge = function () {
-    const dateOfBirthParts = this.dateOfBirth.split("/");
+    const date_of_birthParts = this.date_of_birth.split("/");
     const dob = new Date(
-        parseInt(dateOfBirthParts[2], 10), // Năm
-        parseInt(dateOfBirthParts[1], 10) - 1, // Tháng (0-based)
-        parseInt(dateOfBirthParts[0], 10) // Ngày
+        parseInt(date_of_birthParts[2], 10), // Năm
+        parseInt(date_of_birthParts[1], 10) - 1, // Tháng (0-based)
+        parseInt(date_of_birthParts[0], 10) // Ngày
     );
 
     const today = new Date();
@@ -51,7 +51,7 @@ userSchema.statics.fromJson = function (json) {
         fname: json.fname,
         lname: json.lname,
         email: json.email,
-        dateOfBirth: json.date_of_birth,
+        date_of_birth: json.date_of_birth,
         gender: json.gender,
         weight: json.weight,
         height: json.height,
