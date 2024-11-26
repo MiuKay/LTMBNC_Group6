@@ -22,8 +22,13 @@ const theme = {
     ...MD3LightTheme,
     colors: {
         ...MD3LightTheme.colors,
-        primary: '#1976D2',
-        secondary: '#f50057',
+        primary: '#00796b',
+        secondary: '#d32f2f',
+        background: '#e0f7fa',
+        surface: '#ffffff',
+        error: '#d32f2f',
+        text: '#004d40',
+        onSurface: '#004d40',
     },
 };
 
@@ -41,17 +46,18 @@ export default function App() {
                                 drawerType: Platform.OS === 'web' ? 'permanent' : 'front',
                                 drawerStyle: {
                                     width: '75%',
-                                    backgroundColor: '#f5f5f5',
+                                    backgroundColor: '#e0f2f1',
                                 },
                                 headerStyle: {
-                                    backgroundColor: '#1976D2',
+                                    backgroundColor: '#00796b',
                                 },
-                                headerTintColor: '#fff',
+                                headerTintColor: '#ffffff',
                                 headerTitleStyle: {
                                     fontWeight: 'bold',
+                                    fontSize: 20,
                                 },
-                                drawerActiveTintColor: '#1976D2',
-                                drawerInactiveTintColor: '#424242',
+                                drawerActiveTintColor: '#00796b',
+                                drawerInactiveTintColor: '#004d40',
                             }}
                         >
                             <Drawer.Screen

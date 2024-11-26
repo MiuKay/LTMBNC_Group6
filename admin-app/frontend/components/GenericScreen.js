@@ -30,6 +30,7 @@ import {
 } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useGetList, useCreate, useUpdate, useDelete } from '../hooks/useAPI';
+import { Picker } from '@react-native-picker/picker';
 
 const { width, height } = Dimensions.get('window');
 
@@ -48,6 +49,10 @@ const GenericScreen = ({
     const [snackbarVisible, setSnackbarVisible] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
     const [refreshing, setRefreshing] = useState(false);
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [detailItem, setDetailItem] = useState(null);
+    const [sortField, setSortField] = useState(fields[0].key);
+    const [sortOrder, setSortOrder] = useState('asc'); // 'asc' hoặc 'desc'
 
     const { 
         data: items = [], 
@@ -65,6 +70,12 @@ const GenericScreen = ({
                 .includes(searchQuery.toLowerCase())
         )
     );
+
+    const sortedItems = filteredItems.sort((a, b) => {
+        if (a[sortField] < b[sortField]) return sortOrder === 'asc' ? -1 : 1;
+        if (a[sortField] > b[sortField]) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
 
     const convertStringToDate = (dateString) => {
         if (!dateString) return new Date();
@@ -202,38 +213,54 @@ const GenericScreen = ({
     };
 
     const renderItem = ({ item }) => (
-        <Surface style={styles.itemCard} elevation={2}>
-            <View style={styles.itemContent}>
-                {fields.map(field => (
-                    <View key={field.key} style={styles.itemRow}>
-                        <Text style={styles.itemLabel}>{field.label}</Text>
-                        <Text style={styles.itemValue}>
-                            {item[field.key] || 'N/A'}
-                        </Text>
-                    </View>
-                ))}
-            </View>
-            <View style={styles.actionButtons}>
-                <Button 
-                    mode="outlined" 
-                    onPress={() => openModal(item)}
-                    style={styles.editButton}
-                    icon="pencil"
-                >
-                    Sửa
-                </Button>
-                <Button 
-                    mode="contained" 
-                    onPress={() => handleDelete(item._id)}
-                    style={styles.deleteButton}
-                    icon="delete"
-                    buttonColor={theme.colors.error}
-                >
-                    Xóa
-                </Button>
-            </View>
-        </Surface>
+        <TouchableOpacity onPress={() => openDetailModal(item)}>
+            <Surface style={styles.itemCard} elevation={2}>
+                <View style={styles.itemContent}>
+                    {fields.map(field => (
+                        <View key={field.key} style={styles.itemRow}>
+                            <Text style={styles.itemLabel}>{field.label}</Text>
+                            <Text 
+                                style={styles.itemValue}
+                                numberOfLines={1}
+                                ellipsizeMode="tail"
+                            >
+                                {item[field.key] || 'N/A'}
+                            </Text>
+                        </View>
+                    ))}
+                </View>
+                <View style={styles.actionButtons}>
+                    <Button 
+                        mode="outlined" 
+                        onPress={() => openModal(item)}
+                        style={styles.editButton}
+                        icon="pencil"
+                    >
+                        Sửa
+                    </Button>
+                    <Button 
+                        mode="contained" 
+                        onPress={() => handleDelete(item._id)}
+                        style={styles.deleteButton}
+                        icon="delete"
+                        buttonColor={theme.colors.error}
+                    >
+                        Xóa
+                    </Button>
+                </View>
+            </Surface>
+        </TouchableOpacity>
     );
+
+    const openDetailModal = (item) => {
+        setDetailItem(item);
+        setDetailModalVisible(true);
+    };
+
+    const closeDetailModal = () => {
+        setDetailModalVisible(false);
+        setDetailItem(null);
+    };
 
     const renderFormField = (field) => {
         const error = formErrors[field.key];
@@ -426,8 +453,28 @@ const GenericScreen = ({
                 clearIcon="close"
             />
 
+            <View style={styles.sortContainer}>
+                <Text style={styles.sortLabel}>Sắp xếp theo:</Text>
+                <Picker
+                    selectedValue={sortField}
+                    onValueChange={(itemValue) => setSortField(itemValue)}
+                    style={styles.picker}
+                >
+                    {fields.map(field => (
+                        <Picker.Item key={field.key} label={field.label} value={field.key} />
+                    ))}
+                </Picker>
+                <Button
+                    mode="outlined"
+                    onPress={() => setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))}
+                    style={styles.sortButton}
+                >
+                    {sortOrder === 'asc' ? 'Tăng dần' : 'Giảm dần'}
+                </Button>
+            </View>
+
             <FlatList
-                data={filteredItems}
+                data={sortedItems}
                 renderItem={renderItem}
                 keyExtractor={item => item._id}
                 contentContainerStyle={styles.listContent}
@@ -479,6 +526,35 @@ const GenericScreen = ({
                         </View>
                     </Surface>
                 </Modal>
+
+                <Modal
+                    visible={detailModalVisible}
+                    onDismiss={closeDetailModal}
+                    contentContainerStyle={styles.modalContent}
+                >
+                    <Surface style={styles.modalSurface}>
+                        <Text style={styles.modalTitle}>Chi tiết</Text>
+                        <ScrollView style={styles.formContainer}>
+                            {detailItem && fields.map(field => (
+                                <View key={field.key} style={styles.formField}>
+                                    <Text style={styles.fieldLabel}>{field.label}</Text>
+                                    <Text style={styles.itemValue}>
+                                        {detailItem[field.key] || 'N/A'}
+                                    </Text>
+                                </View>
+                            ))}
+                        </ScrollView>
+                        <View style={styles.modalActions}>
+                            <Button 
+                                mode="outlined" 
+                                onPress={closeDetailModal}
+                                style={styles.modalButton}
+                            >
+                                Đóng
+                            </Button>
+                        </View>
+                    </Surface>
+                </Modal>
             </Portal>
 
             <FAB
@@ -507,11 +583,13 @@ const GenericScreen = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#e0f7fa',
     },
     searchBar: {
         margin: 16,
         elevation: 4,
+        borderRadius: 8,
+        backgroundColor: '#ffffff',
     },
     listContent: {
         padding: 16,
@@ -519,8 +597,10 @@ const styles = StyleSheet.create({
     },
     itemCard: {
         marginBottom: 16,
-        borderRadius: 8,
+        borderRadius: 12,
         overflow: 'hidden',
+        backgroundColor: '#ffffff',
+        elevation: 3,
     },
     itemContent: {
         padding: 16,
@@ -531,47 +611,54 @@ const styles = StyleSheet.create({
         marginBottom: 8,
     },
     itemLabel: {
-        fontSize: 14,
-        fontWeight: '600',
+        fontSize: 16,
+        fontWeight: 'bold',
         flex: 1,
+        color: '#00796b',
     },
     itemValue: {
-        fontSize: 14,
+        fontSize: 16,
         flex: 2,
         textAlign: 'right',
+        color: '#004d40',
     },
     actionButtons: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
         padding: 8,
-        backgroundColor: '#f9f9f9',
+        backgroundColor: '#e0f2f1',
     },
     editButton: {
         marginRight: 8,
+        borderColor: '#00796b',
     },
     deleteButton: {
         marginLeft: 8,
+        backgroundColor: '#d32f2f',
     },
     fab: {
         position: 'absolute',
         right: 16,
         bottom: 16,
         elevation: 8,
+        backgroundColor: '#00796b',
     },
     modalContent: {
         padding: 20,
     },
     modalSurface: {
-        backgroundColor: 'white',
-        borderRadius: 8,
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
         padding: 16,
         maxHeight: height * 0.8,
+        elevation: 5,
     },
     modalTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
         marginBottom: 16,
         textAlign: 'center',
+        color: '#00796b',
     },
     formContainer: {
         maxHeight: height * 0.6,
@@ -580,14 +667,13 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     fieldLabel: {
-        fontSize: 16,
+        fontSize: 18,
         marginBottom: 8,
+        color: '#004d40',
     },
     input: {
-        backgroundColor: 'white',
-    },
-    dateInput: {
-        width: '100%',
+        backgroundColor: '#ffffff',
+        borderColor: '#00796b',
     },
     segmentedButtons: {
         marginTop: 8,
@@ -602,6 +688,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 50,
+    },
+    emptyText: {
+        fontSize: 18,
+        color: '#004d40',
+    },
+    sortContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        margin: 16,
+    },
+    sortLabel: {
+        fontSize: 16,
+        marginRight: 8,
+    },
+    picker: {
+        flex: 1,
+        marginRight: 8,
+    },
+    sortButton: {
+        borderColor: '#00796b',
     },
 });
 
