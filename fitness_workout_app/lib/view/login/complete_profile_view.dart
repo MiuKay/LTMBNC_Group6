@@ -7,9 +7,6 @@ import '../../common_widget/round_button.dart';
 import '../../common_widget/round_textfield.dart';
 import '../../common_widget/selectDate.dart';
 import '../../services/auth.dart';
-import 'package:fitness_workout_app/model/user_model.dart';
-
-import 'activate_account.dart';
 
 class CompleteProfileView extends StatefulWidget {
   const CompleteProfileView({super.key});

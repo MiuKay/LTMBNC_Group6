@@ -360,7 +360,7 @@ class TimerModelSec with ChangeNotifier {
   }
 
   void _startTimer(BuildContext context, List<Exercise> exercises, int index) {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (!visible && !isPassed) {
         countdown--;
         notifyListeners();
@@ -370,33 +370,34 @@ class TimerModelSec with ChangeNotifier {
 
           // Cập nhật lịch sử tập luyện sau khi hoàn thành bài tập
           final exercise = exercises[index];
-          _workoutService.updateWorkoutHistory(
+          await _workoutService.updateWorkoutHistory(
             historyId: historyId,
             index: index,
             duration: exercise.time,
             caloriesBurned: exercise.calo,
             completedAt: DateTime.now(),
-          ).then((_) {
-            if (index >= exercises.length - 1) {
-              // Nếu là bài tập cuối cùng, chuyển đến FinishedWorkoutView
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => FinishedWorkoutView(historyId: historyId,)),
-              );
-            } else {
-              // Chuyển đến bài tập tiếp theo
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BreakTime(
-                    exercises: exercises,
-                    index: index + 1,
-                    historyId: historyId,
-                  ),
-                ),
-              );
-            }
-          });
+          );
+          if (index >= exercises.length - 1) {
+            // Nếu là bài tập cuối cùng, chuyển đến FinishedWorkoutView
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) =>
+                  FinishedWorkoutView(historyId: historyId,)),
+            );
+          } else {
+            // Chuyển đến bài tập tiếp theo
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    BreakTime(
+                      exercises: exercises,
+                      index: index + 1,
+                      historyId: historyId,
+                    ),
+              ),
+            );
+          }
         }
       } else if (isPassed) {
         timer.cancel();

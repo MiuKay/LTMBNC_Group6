@@ -8,6 +8,8 @@ class WorkoutSchedule {
   final bool notify;
   final String repeatInterval;
   final String id_notify;
+  final String id_cate;
+  final String pic;
 
   WorkoutSchedule({
     required this.id,
@@ -19,10 +21,12 @@ class WorkoutSchedule {
     required this.notify,
     required this.repeatInterval,
     required this.id_notify,
+    required this.id_cate,
+    required this.pic,
   });
 
   // Phương thức chuyển đổi từ Map (JSON) sang đối tượng WorkoutSchedule
-  factory WorkoutSchedule.fromFirestore(Map<String, dynamic> data) {
+  factory WorkoutSchedule.fromJson(Map<String, dynamic> data) {
     return WorkoutSchedule(
       id: data['id'],
       uid: data['uid'],
@@ -33,6 +37,8 @@ class WorkoutSchedule {
       notify: data['notify'],
       repeatInterval: data['repeat_interval'],
       id_notify: data['id_notify'],
+      id_cate: data['id_cate'],
+      pic: data['pic'],
     );
   }
 
@@ -48,6 +54,8 @@ class WorkoutSchedule {
       'notify': notify,
       'repeat_interval': repeatInterval,
       'id_notify': id_notify,
+      'id_cate': id_cate,
+      'pic': pic,
     };
   }
 }

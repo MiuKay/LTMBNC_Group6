@@ -153,28 +153,21 @@ class TimerModelSec with ChangeNotifier {
 
   void _startTimer(BuildContext context, List<Exercise> exercises, int index, String historyId) {
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (!visible && !isPassed) {  // Đếm ngược nếu không tạm dừng hoặc chuyển bài
+      if (!visible && !isPassed) { // Đếm ngược nếu không tạm dừng hoặc chuyển bài
         countdown--;
         notifyListeners();
 
         if (countdown <= 0) {
           timer.cancel();
-
-          if (index >= exercises.length - 1) {
-            // Nếu đây là bài tập cuối cùng, chuyển đến FinishedWorkoutView
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => FinishedWorkoutView(historyId: historyId,)),
-            );
-          } else {
-            // Nếu còn bài tập tiếp theo, chuyển đến BreakTime
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => WorkOutDet(exercises: exercises, index: index, historyId: historyId,),
-              ),
-            );
-          }
+          // Nếu còn bài tập tiếp theo, chuyển đến BreakTime
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  WorkOutDet(
+                    exercises: exercises, index: index, historyId: historyId,),
+            ),
+          );
         }
       } else if (isPassed) {
         timer.cancel();

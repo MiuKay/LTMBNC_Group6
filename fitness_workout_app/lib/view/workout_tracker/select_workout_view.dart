@@ -13,17 +13,37 @@ class SelectWorkoutView extends StatefulWidget {
 class _SelectWorkoutViewState extends State<SelectWorkoutView> {
   final WorkoutService _workoutService = WorkoutService();
   List<Map<String, dynamic>> whatArr = [];
+  List<Map<String, dynamic>> filteredArr = [];
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadCategoryWorkouts();
+    _searchController.addListener(_filterWorkouts);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCategoryWorkouts() async {
     List<Map<String, dynamic>> workouts = await _workoutService.fetchCategoryWorkoutList();
     setState(() {
       whatArr = workouts;
+      filteredArr = workouts;
+    });
+  }
+
+  void _filterWorkouts() {
+    String query = _searchController.text.toLowerCase();
+    setState(() {
+      filteredArr = whatArr.where((workout) {
+        // Tìm kiếm dựa trên tên hoặc các thuộc tính khác
+        return workout["title"].toLowerCase().contains(query); // Giả sử mỗi phần tử có trường 'name'
+      }).toList();
     });
   }
 
@@ -81,13 +101,34 @@ class _SelectWorkoutViewState extends State<SelectWorkoutView> {
               child: Column(
                 children: [
                   const SizedBox(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: double.infinity,
+                      child: TextField(
+                        controller: _searchController,
+                        style: TextStyle(color: Colors.black),
+                        decoration: InputDecoration(
+                          hintText: 'Search...',
+                          hintStyle: TextStyle(color: Colors.black.withOpacity(0.7)),
+                          filled: true,
+                          fillColor: Colors.grey.withOpacity(0.1),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        ),
+                      ),
+                    ),
+                  ),
                   ListView.builder(
                       padding: EdgeInsets.zero,
                       physics: const NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: whatArr.length,
+                      itemCount: filteredArr.length,
                       itemBuilder: (context, index) {
-                        var wObj = whatArr[index] as Map? ?? {};
+                        var wObj = filteredArr[index] as Map? ?? {};
                         return SelectTrainRow(
                           wObj: wObj,
                           onSelect: (selectedTitle) {

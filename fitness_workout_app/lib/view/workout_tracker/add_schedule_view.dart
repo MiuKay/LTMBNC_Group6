@@ -27,6 +27,7 @@ class _AddScheduleViewState extends State<AddScheduleView> {
   String day = "";
   String hour = "";
   bool isLoading = false;
+  bool isNotificationEnabled = true;
 
   @override
   void initState() {
@@ -64,7 +65,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
           hour: hour,
           name: selectedWorkout.text.trim(),
           repeatInterval: selectedRepetition.text.trim(),
-          uid: uid);
+          uid: uid,
+          notify: isNotificationEnabled);
 
 
       if (res == "success") {
@@ -181,14 +183,14 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 20,
+              SizedBox(
+                height: media.width * 0.04,
               ),
               Text(
                 "Time",
                 style: TextStyle(
                     color: TColor.black,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500),
               ),
               SizedBox(
@@ -201,18 +203,18 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                   mode: CupertinoDatePickerMode.time,
                 ),
               ),
-              const SizedBox(
-                height: 24,
+              SizedBox(
+                height: media.width * 0.06,
               ),
               Text(
                 "Details Workout",
                 style: TextStyle(
                     color: TColor.black,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500),
               ),
-              const SizedBox(
-                height: 10,
+              SizedBox(
+                height: media.width * 0.03,
               ),
               IconTitleNextRow(
                 icon: "assets/img/choose_workout.png",
@@ -233,8 +235,8 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                   }
                 },
               ),
-              const SizedBox(
-                height: 12,
+              SizedBox(
+                height: media.width * 0.03,
               ),
               InkWell(
                 onTap: () {
@@ -294,15 +296,39 @@ class _AddScheduleViewState extends State<AddScheduleView> {
                   ),
                 ),
               ),
-
-              const SizedBox(
-                height: 12,
+              SizedBox(
+                height: media.width * 0.03,
               ),
               RepetitionsRow(
                 icon: "assets/img/repetitions.png",
                 title: "Custom Repetitions",
                 color: TColor.lightGray,
                 repetitionController: selectedRepetition,
+              ),
+              SizedBox(
+                height: media.width * 0.03,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Enable Notifications",
+                    style: TextStyle(
+                      color: TColor.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Switch(
+                    value: isNotificationEnabled,
+                    activeColor: TColor.primaryColor1,
+                    onChanged: (value) {
+                      setState(() {
+                        isNotificationEnabled = value;
+                      });
+                    },
+                  ),
+                ],
               ),
 
               Spacer(),

@@ -1,5 +1,6 @@
 import 'package:calendar_agenda/calendar_agenda.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness_workout_app/view/workout_tracker/workout_tracker_view.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -87,7 +88,6 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
         );
       },
     );
-
     // Nếu người dùng xác nhận, gọi hàm xoá lịch bài tập
     if (confirm == true) {
       String res = await _workoutService.deleteWorkoutSchedule(scheduleId: Id);
@@ -115,30 +115,12 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
         backgroundColor: TColor.white,
         centerTitle: true,
         elevation: 0,
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            height: 40,
-            width: 40,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-                color: TColor.lightGray,
-                borderRadius: BorderRadius.circular(10)),
-            child: Image.asset(
-              "assets/img/black_btn.png",
-              width: 15,
-              height: 15,
-              fit: BoxFit.contain,
-            ),
-          ),
-        ),
+        leadingWidth: 0,
+        leading: const SizedBox(),
         title: Text(
           "Workout Schedule",
           style: TextStyle(
-              color: TColor.black, fontSize: 16, fontWeight: FontWeight.w700),
+              color: TColor.black, fontSize: 22, fontWeight: FontWeight.w700),
         ),
       ),
       backgroundColor: TColor.white,
@@ -313,24 +295,17 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                                 fontWeight: FontWeight
                                                                     .w700),),
 
-                                                          PopupMenuButton<
-                                                              String>(
+                                                          PopupMenuButton<String>(
                                                             icon: Container(
-                                                              margin: const EdgeInsets
-                                                                  .all(8),
+                                                              margin: const EdgeInsets.all(8),
                                                               height: 40,
                                                               width: 40,
-                                                              alignment: Alignment
-                                                                  .center,
+                                                              alignment: Alignment.center,
                                                               decoration: BoxDecoration(
-                                                                color: TColor
-                                                                    .lightGray,
-                                                                borderRadius: BorderRadius
-                                                                    .circular(
-                                                                    10),
+                                                                color: TColor.lightGray,
+                                                                borderRadius: BorderRadius.circular(10),
                                                               ),
-                                                              child: Image
-                                                                  .asset(
+                                                              child: Image.asset(
                                                                 "assets/img/more_btn.png",
                                                                 width: 15,
                                                                 height: 15,
@@ -338,57 +313,34 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                                     .contain,
                                                               ),
                                                             ),
-                                                            onSelected: (
-                                                                value) async {
-                                                              if (value ==
-                                                                  'edit') {
+                                                            onSelected: (value) async {
+                                                              if (value == 'edit') {
                                                                 WorkoutSchedule schedule = await _workoutService
-                                                                    .getWorkoutScheduleById(
-                                                                    scheduleId: sObj["id"]);
-                                                                // Sử dụng await để chờ EditScheduleView hoàn thành
-                                                                final result = await Navigator
-                                                                    .push(
+                                                                    .getWorkoutScheduleById(scheduleId: sObj["id"]);
+                                                                final result = await Navigator.push(
                                                                   context,
                                                                   MaterialPageRoute(
-                                                                    builder: (
-                                                                        context) =>
-                                                                        EditScheduleView(
-                                                                          schedule: schedule,
-                                                                        ),
+                                                                    builder: (context) => EditScheduleView(schedule: schedule,),
                                                                   ),
                                                                 );
-                                                                // Kiểm tra nếu result trả về là true
-                                                                if (result ==
-                                                                    true) {
-                                                                  // Gọi hàm load lại danh sách lịch tập
+                                                                if (result == true) {
                                                                   _loadWorkOutSchedule();
-                                                                  Navigator.pop(
-                                                                      context);
+                                                                  Navigator.pop(context);
                                                                 }
                                                               } else
-                                                              if (value ==
-                                                                  'delete') {
-                                                                print(
-                                                                    'Remove clicked');
-                                                                _confirmDeleteSchedule(
-                                                                    sObj["id"]);
+                                                              if (value == 'delete') {
+                                                                print('Remove clicked');
+                                                                _confirmDeleteSchedule(sObj["id"]);
                                                               }
                                                             },
-                                                            itemBuilder: (
-                                                                BuildContext context) =>
-                                                            <PopupMenuEntry<
-                                                                String>>[
-                                                              PopupMenuItem<
-                                                                  String>(
+                                                            itemBuilder: (BuildContext context) =>
+                                                            <PopupMenuEntry<String>>[const PopupMenuItem<String>(
                                                                 value: 'edit',
-                                                                child: Text(
-                                                                    'Edit'),
+                                                                child: Text('Edit'),
                                                               ),
-                                                              PopupMenuItem<
-                                                                  String>(
+                                                              const PopupMenuItem<String>(
                                                                 value: 'delete',
-                                                                child: Text(
-                                                                    'Delete'),
+                                                                child: Text('Delete'),
                                                               ),
                                                             ],
                                                           )
@@ -415,15 +367,10 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                                           const SizedBox(
                                                               width: 8),
                                                           Text(
-                                                            "${getDayTitle(
-                                                                sObj["start_time"]
-                                                                    .toString())}|${getStringDateToOtherFormate(
-                                                                sObj["start_time"]
-                                                                    .toString(),
-                                                                outFormatStr: "h:mm aa")}",
+                                                            "${getDayTitle(sObj["start_time"].toString())}|${getStringDateToOtherFormate(
+                                                                sObj["start_time"].toString(), outFormatStr: "h:mm aa")}",
                                                             style: TextStyle(
-                                                                color: TColor
-                                                                    .gray,
+                                                                color: TColor.gray,
                                                                 fontSize: 12),
                                                           )
                                                         ],
@@ -439,14 +386,11 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
                                       child: Container(
                                         height: 35,
                                         width: availWidth * 0.55,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8),
                                         alignment: Alignment.centerLeft,
                                         decoration: BoxDecoration(
-                                          gradient: LinearGradient(
-                                              colors: TColor.secondaryG),
-                                          borderRadius: BorderRadius.circular(
-                                              17.5),
+                                          gradient: LinearGradient(colors: TColor.secondaryG),
+                                          borderRadius: BorderRadius.circular(17.5),
                                         ),
                                         child: Text(
                                           "${sObj["name"]
@@ -488,20 +432,20 @@ class _WorkoutScheduleViewState extends State<WorkoutScheduleView> {
       ),
       floatingActionButton: InkWell(
         onTap: () async {
+          //print('Gio hien tai: $_selectedDateAppBBar');
+          DateTime now = DateTime.now();
+          DateTime startOfDay = DateTime(now.year, now.month, now.day);
+          //print('Gio kiem tra: $startOfDay');
           // Kiểm tra nếu ngày được chọn là quá khứ so với thời gian hiện tại
-          if (_selectedDateAppBBar.isBefore(
-              DateTime.now().subtract(Duration(hours: DateTime
-                  .now()
-                  .hour)))) {
+          if (_selectedDateAppBBar.isBefore(startOfDay)) {
             return;
           }
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  AddScheduleView(
-                    date: _selectedDateAppBBar,
-                  ),
+              builder: (context) => AddScheduleView(
+                date: _selectedDateAppBBar,
+              ),
             ),
           );
           if (result == true) {

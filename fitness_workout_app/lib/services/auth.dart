@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness_workout_app/model/user_model.dart';
-import 'package:intl/intl.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'notification.dart';
@@ -27,19 +26,15 @@ class AuthService {
           fname.isEmpty || lname.isEmpty) {
         return res = "Vui lòng điền đầy đủ thông tin"; // Lỗi nhập thiếu
       }
-
       if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(email)) {
         return
           res = "Vui lòng điền đúng định dạng email"; // Email sai định dạng
       }
-
       // Lấy thông tin user từ Firestore dựa trên email
       var userSnapshot = await _firestore.collection('users').where('email', isEqualTo: email).get();
-
       if (userSnapshot.docs.isNotEmpty) {
         return "Email này đã được đăng ký.";
       }
-
       if (email.isNotEmpty ||
           password.isNotEmpty ||
           fname.isNotEmpty || lname.isNotEmpty) {
@@ -59,7 +54,6 @@ class AuthService {
           'role': role,
           'activate': activate,
         });
-
         res = "success";
       }
     } catch (err) {
@@ -78,93 +72,30 @@ class AuthService {
       if (email.isEmpty || password.isEmpty) {
         return "Vui lòng nhập đầy đủ thông tin"; // Lỗi nhập thiếu
       }
-
       if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]+$").hasMatch(
           email)) {
         return "Vui lòng nhập đúng định dạng email"; // Email sai định dạng
       }
-
       // Lấy thông tin user từ Firestore dựa trên email
       var userSnapshot = await _firestore.collection('users').where('email', isEqualTo: email).get();
-
       if (userSnapshot.docs.isEmpty) {
         return "Không tìm thấy tài khoản với email này.";
       }
-
       var userDoc = userSnapshot.docs.first;
       bool isActivated = userDoc['activate'];
-
       if (!isActivated) {
         return "not-activate";
       }
-
       // Đăng nhập người dùng bằng email và mật khẩu
       await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-
-      // Lấy lịch từ collection WorkoutSchedule của người dùng
-      var workoutScheduleSnapshot = await _firestore
-          .collection('WorkoutSchedule')
-          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .get();
-
-// Duyệt qua các lịch và lên lịch lại thông báo
-      for (var workoutScheduleDoc in workoutScheduleSnapshot.docs) {
-        bool notify = workoutScheduleDoc['notify']; // Kiểm tra trường notify
-
-        // Nếu notify là false, bỏ qua và không làm gì
-        if (!notify) {
-          continue; // Bỏ qua tài liệu này và tiếp tục với tài liệu tiếp theo
-        }
-
-        var workoutId = workoutScheduleDoc['id']; // Lấy ID của lịch
-        var hour = workoutScheduleDoc['hour'];
-        var day = workoutScheduleDoc['day'];
-        var title = workoutScheduleDoc['name']; // Tiêu đề workout
-        var repeatInterval = workoutScheduleDoc['repeat_interval']; // Lấy thời gian lặp lại
-
-        final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
-        final DateFormat hourFormat = DateFormat('hh:mm a');
-        DateTime selectedDay = dateFormat.parse(day);
-        DateTime selectedHour = hourFormat.parse(hour);
-
-        DateTime selectedDateTime = DateTime(
-          selectedDay.year,
-          selectedDay.month,
-          selectedDay.day,
-          selectedHour.hour,
-          selectedHour.minute,
-        );
-
-        // Kiểm tra nếu lịch là trong quá khứ và không phải lịch lặp lại
-        if (selectedDateTime.isBefore(DateTime.now()) && repeatInterval == 'no') {
-          // Nếu thời gian lên lịch đã qua và không phải lịch lặp lại, bỏ qua lịch này
-          continue;
-        }
-
-        // Lên lịch lại thông báo dựa trên thông tin từ Firestore
-        String id_notify = await notificationServices.scheduleWorkoutNotification(
-          id: workoutId,
-          scheduledTime: selectedDateTime,
-          workoutName: title,
-          repeatInterval: repeatInterval,
-        );
-
-        // Cập nhật trường id_notify trong tài liệu của collection WorkoutSchedule
-        await _firestore
-            .collection('WorkoutSchedule')
-            .doc(workoutScheduleDoc.id) // Lấy ID tài liệu để cập nhật
-            .update({
-          'id_notify': id_notify, // Cập nhật id_notify với giá trị đã lấy
-        });
-
-        print('Notification ID updated for workout ${workoutScheduleDoc.id}');
+      String addData = await notificationServices.loadAllNotifications();
+      if(addData != "success"){
+        return addData;
       }
-
       res = "success";
-
     } catch (err) {
       return err.toString();
     }
@@ -190,16 +121,13 @@ class AuthService {
         height.isEmpty) {
       return "Vui lòng điền đầy đủ thông tin.";
     }
-
     if (double.tryParse(weight) == null || double.parse(weight) <= 30) {
       return "Cân nặng phải là số và lớn hơn 30.";
     }
-
     if (double.tryParse(height) == null || double.parse(height) <= 50 ||
         double.parse(height) >= 300) {
       return "Chiều cao phải là số và lớn hơn 50 và nhỏ hơn 300.";
     }
-
     try {
       await _firestore.collection("users").doc(uid).update({
         'date_of_birth': dateOfBirth,
@@ -212,7 +140,6 @@ class AuthService {
     } catch (e) {
       res = e.toString();
     }
-
     return res;
   }
 
@@ -296,59 +223,42 @@ class AuthService {
           .collection('users')
           .where('email', isEqualTo: email)
           .get();
-
       if (querySnapshot.docs.isEmpty) {
         return "Không tìm thấy người dùng.";
       }
-
       // Giả sử chỉ có một tài liệu khớp
       DocumentSnapshot userDoc = querySnapshot.docs.first;
-
       String uid = userDoc['uid'];
       String oldPass = userDoc['password'];
-
       if (!userDoc.exists) {
         return "OTP không tồn tại.";
       }
-
       var data = userDoc.data() as Map<String, dynamic>?;
       if (data == null) return "OTP không hợp lệ.";
-
       int expiresAt = data['expiresAt'];
       String storedOtp = data['otp'];
-
-      if (DateTime
-          .now()
-          .millisecondsSinceEpoch > expiresAt) {
+      if (DateTime.now().millisecondsSinceEpoch > expiresAt) {
         return "OTP đã hết hạn.";
       }
-
       if (storedOtp != otp) {
         return "OTP không đúng.";
       }
-
       await _auth.signInWithEmailAndPassword(
         email: email,
         password: oldPass,
       );
-
       // Lấy thông tin người dùng hiện tại sau khi đăng nhập
       User? user = _auth.currentUser;
       if (user == null) {
         return "Không tìm thấy người dùng.";
       }
-
       // Cập nhật mật khẩu mới
       await user.updatePassword(newPass);
-
       await _auth.signOut();
-
       await _firestore.collection("users").doc(uid).update({
         'password': newPass,
       });
-
       return "success";
-
     }catch(e) {
       return 'Có lỗi xảy ra: $e';
     }
@@ -407,7 +317,6 @@ class AuthService {
       if (querySnapshot.docs.isEmpty) {
         return "Không tìm thấy người dùng.";
       }
-
       // Giả sử chỉ có một tài liệu khớp
       DocumentSnapshot userDoc = querySnapshot.docs.first;
 
@@ -439,41 +348,31 @@ class AuthService {
     }
   }
 
-
-  // Hàm để tạo mã OTP ngẫu nhiên
   String _generateOtp() {
     final random = Random();
     return List.generate(6, (_) => random.nextInt(10).toString()).join();
   }
-
   // Xác minh OTP và kiểm tra thời gian hết hạn
   Future<String> verifyOtp({required String uid, required String otp}) async {
     DocumentSnapshot snapshot = await _firestore.collection('users').doc(uid).get();
     if (!snapshot.exists) {
       return "OTP không tồn tại.";
     }
-
     var data = snapshot.data() as Map<String, dynamic>?;
     if (data == null) return "OTP không hợp lệ.";
-
     int expiresAt = data['expiresAt'];
     String storedOtp = data['otp'];
-
     if (DateTime.now().millisecondsSinceEpoch > expiresAt) {
       return "OTP đã hết hạn.";
     }
-
     if (storedOtp != otp) {
       return "OTP không đúng.";
     }
-
     await _firestore.collection("users").doc(uid).update({
       'activate': true,
     });
-
     return "success";
   }
-
 }
 
 

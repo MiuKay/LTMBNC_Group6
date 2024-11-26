@@ -3,10 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
+import '../../model/user_model.dart';
 import '../../services/auth.dart';
+import '../main_tab/main_tab_view.dart';
 
 class ChangeGoalView extends StatefulWidget {
-  const ChangeGoalView({super.key});
+  final UserModel user;
+  const ChangeGoalView({super.key, required this.user});
 
   @override
   State<ChangeGoalView> createState() => _ChangeGoalViewState();
@@ -14,8 +17,14 @@ class ChangeGoalView extends StatefulWidget {
 
 class _ChangeGoalViewState extends State<ChangeGoalView> {
   CarouselSliderController buttonCarouselController = CarouselSliderController();
-  String selectedGoal = "Improve Shape";
+  String selectedGoal = "";
   int currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
 
   List goalArr = [
     {
@@ -38,10 +47,18 @@ class _ChangeGoalViewState extends State<ChangeGoalView> {
     },
   ];
 
+  void _loadData() async {
+    selectedGoal = widget.user.level;
+    print('${widget.user.level}');
+    if(widget.user.level == "Lose a Fat"){currentIndex = 2;}
+    if(widget.user.level == "Lean & Tone"){currentIndex = 1;}
+    print('$currentIndex');
+  }
+
   void changeGoal() async {
     try {
       await AuthService().updateUserLevel(FirebaseAuth.instance.currentUser!.uid, selectedGoal);
-        Navigator.pop(context);
+      _getUserInfo();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi xảy ra: $e')),
@@ -49,6 +66,30 @@ class _ChangeGoalViewState extends State<ChangeGoalView> {
     }
   }
 
+  void _getUserInfo() async {
+    try {
+      UserModel? user = await AuthService().getUserInfo(
+          FirebaseAuth.instance.currentUser!.uid);
+
+      if (user != null) {
+        // Điều hướng đến HomeView với user
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainTabView(user: user, initialTab: 3),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
