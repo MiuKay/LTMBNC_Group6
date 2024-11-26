@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import '../model/exercise_model.dart';
 import '../model/step_exercise_model.dart';
-import '../model/tip_model.dart';
 import '../model/workout_schedule_model.dart';
 import 'notification.dart';
 
@@ -85,9 +85,10 @@ class WorkoutService {
           'exercises': "$exerciseCount Exercises",
           'time': "$totalTimeInMinutes Mins",
           'calo': "$totalCalo Calories Burn",
+          'difficulty': 'Beginner',
         });
         //} else {
-        print("No exercise names found for category $title.");
+        //print("No exercise names found for category $title.");
         //}
       }
     } catch (e) {
@@ -99,6 +100,7 @@ class WorkoutService {
   Future<List<Map<String, dynamic>>> fetchCategoryWorkoutWithLevelList(
       {required String level}) async {
     List<Map<String, dynamic>> categoryWorkoutList = [];
+    String diff = 'Beginner';
 
     try {
       // Fetch all CategoryWorkout documents
@@ -174,6 +176,7 @@ class WorkoutService {
             'exercises': "$exerciseCount Exercises",
             'time': "$totalTimeInMinutes Mins",
             'calo': "$totalCalo Calories Burn",
+            'difficulty': diff,
           });
         } else {
           print("No exercise names found for category $title.");
@@ -260,7 +263,7 @@ class WorkoutService {
         // Tạo bản đồ nhanh để tra cứu tài liệu Exercises
         Map<String, Exercise> exerciseMap = {
           for (var doc in exerciseSnapshot.docs)
-            doc['name']: Exercise.fromFirestore(
+            doc['name']: Exercise.fromJson(
                 doc.data() as Map<String, dynamic>)
         };
 
@@ -497,15 +500,25 @@ class WorkoutService {
     required String name,
     required String repeatInterval,
     required String uid,
+    required bool notify,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
-    bool notify = true;
 
     try {
       // Kiểm tra nếu name hoặc difficulty trống
       if (name.isEmpty || difficulty.isEmpty) {
         return ("Error: Name and difficulty must not be empty.");
       }
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('CategoryWorkout')
+          .where('name', isEqualTo: name)
+          .get();
+
+      var doc = snapshot.docs.first; // Lấy tài liệu đầu tiên
+      String id_cate = doc.id;
+      String pic = doc['pic'];
+
       // Chuyển đổi chuỗi ngày và giờ thành DateTime
       final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
       final DateFormat hourFormat = DateFormat('hh:mm a');
@@ -532,7 +545,6 @@ class WorkoutService {
         return "Error: A workout is already scheduled for this day and time.";
       }
 
-      // Lưu vào Firestore
       CollectionReference workoutScheduleRef = FirebaseFirestore.instance.collection('WorkoutSchedule');
       Map<String, dynamic> workoutData = {
         'day': day,
@@ -542,10 +554,11 @@ class WorkoutService {
         'repeat_interval': repeatInterval,
         'uid': uid,
         'notify': notify,
+        'id_cate': id_cate,
+        'pic': pic,
       };
 
       DocumentReference docRef = await workoutScheduleRef.add(workoutData);
-
 
       // Đặt lịch thông báo
       String id_notify = await notificationServices.scheduleWorkoutNotification(
@@ -553,6 +566,9 @@ class WorkoutService {
         scheduledTime: selectedDateTime,
         workoutName: name,
         repeatInterval: repeatInterval,
+        id_cate: id_cate,
+        pic: pic,
+        diff: difficulty,
       );
 
       await docRef.update({
@@ -594,8 +610,46 @@ class WorkoutService {
     return false; // Không có sự kiện trùng lặp
   }
 
+  Future<bool> _checkDuplicateEventForUpdate(String uid, String id, DateTime day,
+      DateTime hour) async {
+    final DateFormat hourFormat = DateFormat('hh:mm a');
+
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('WorkoutSchedule')
+          .where('uid', isEqualTo: uid)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        DateTime eventDay = DateFormat('dd/MM/yyyy').parse(doc['day']);
+        DateTime eventHour = hourFormat.parse(doc['hour']);
+
+        if(doc.id == id) {continue;}
+        // Kiểm tra nếu có sự kiện trùng lặp với ngày và giờ
+        if (eventDay.isAtSameMomentAs(day) &&
+            eventHour.isAtSameMomentAs(hour)) {
+          return true; // Nếu trùng lặp, trả về true
+        }
+      }
+    } catch (e) {
+      print("Error checking duplicate event: $e");
+    }
+    return false; // Không có sự kiện trùng lặp
+  }
+
   Future<String> deleteWorkoutSchedule({required String scheduleId}) async {
     try {
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('WorkoutSchedule')
+          .where('id', isEqualTo: scheduleId)
+          .get();
+
+      var doc = snapshot.docs.first;
+      String id_notify = doc['id_notify'];
+
+      await notificationServices.cancelNotificationById(int.parse(id_notify));
+
       // Truy cập đến collection 'WorkoutSchedule' và xoá tài liệu theo id
       await FirebaseFirestore.instance
           .collection('WorkoutSchedule')
@@ -613,7 +667,7 @@ class WorkoutService {
     DocumentSnapshot doc = await _firestore.collection("WorkoutSchedule")
         .doc(scheduleId)
         .get();
-    return WorkoutSchedule.fromFirestore(doc.data() as Map<String, dynamic>);
+    return WorkoutSchedule.fromJson(doc.data() as Map<String, dynamic>);
   }
 
   Future<String> updateSchedule({
@@ -624,14 +678,27 @@ class WorkoutService {
     required String name,
     required String repeatInterval,
     required String uid,
+    required bool notify,
+    required String id_notify,
   }) async {
     String res = "Có lỗi gì đó xảy ra";
+    String newid_notify = id_notify;
 
     try {
       // Kiểm tra nếu name hoặc difficulty trống
       if (name.isEmpty || difficulty.isEmpty) {
         return ("Error: Name and difficulty must not be empty.");
       }
+
+      QuerySnapshot snapshot = await _firestore
+          .collection('CategoryWorkout')
+          .where('name', isEqualTo: name)
+          .get();
+
+      var doc = snapshot.docs.first; // Lấy tài liệu đầu tiên
+      String id_cate = doc.id;
+      String pic = doc['pic'];
+
       // Chuyển day và hour thành DateTime để kiểm tra trùng lặp và thời gian hợp lệ
       final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
       final DateFormat hourFormat = DateFormat('hh:mm a');
@@ -650,17 +717,37 @@ class WorkoutService {
         return "Error: The selected date and time cannot be in the past.";
       }
       // Kiểm tra nếu đã có sự kiện trùng lặp trong Firestore
-      bool isDuplicate = await _checkDuplicateEvent(
-          uid, selectedDay, selectedHour);
+      bool isDuplicate = await _checkDuplicateEventForUpdate(
+          uid, id, selectedDay, selectedHour);
       if (isDuplicate) {
         return "Error: A workout is already scheduled for this day and time.";
       }
+
+      await notificationServices.cancelNotificationById(int.parse(id_notify));
+
+      if(notify) { // Đặt lịch thông báo
+        newid_notify = await notificationServices
+            .scheduleWorkoutNotification(
+          id: id,
+          scheduledTime: selectedDateTime,
+          workoutName: name,
+          repeatInterval: repeatInterval,
+          id_cate: id_cate,
+          pic: pic,
+          diff: difficulty,
+        );
+      }
+
       // Cập nhật lại tài liệu với ID của tài liệu vào trường 'id'
       await _firestore.collection('WorkoutSchedule').doc(id).update({
         'difficulty': difficulty,
         'hour': hour,
         'name': name,
         'repeat_interval': repeatInterval,
+        'notify': notify,
+        'id_cate': id_cate,
+        'pic': pic,
+        'id_notify': newid_notify,
       });
 
       res = ("success");
@@ -804,14 +891,9 @@ class WorkoutService {
 
         final categoryData = categorySnapshot.data() as Map<String, dynamic>?;
 
-        final Map<String, String> list = await fetchTimeAndCalo(
-          categoryId: idCate,
-          difficulty: historyData['difficulty'],
-        );
-
         // Chuyển đổi exercisesArr từ List<dynamic> thành List<Exercise>
         List<Exercise> exercisesArr = (historyData['exercisesArr'] as List)
-            .map((exercise) => Exercise.fromFirestore(exercise))
+            .map((exercise) => Exercise.fromJson(exercise))
             .toList();
 
         // Tính toán 'process'
@@ -828,6 +910,7 @@ class WorkoutService {
           'exercisesArr': exercisesArr,
           'calo': historyData['caloriesBurned'] ?? 0,
           'time': (historyData['duration']! / 60) ?? 0,
+          'completedAt': historyData['completedAt'],
         });
       }
     } catch (e) {
@@ -836,7 +919,85 @@ class WorkoutService {
     return resultList;
   }
 
+  Future<List<WorkoutSchedule>> getClosestWorkoutSchedules({
+    required String uid,
+  }) async {
+    try {
+      // Lấy toàn bộ danh sách theo uid
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('WorkoutSchedule')
+          .where('uid', isEqualTo: uid)
+          .get();
+      // Chuyển đổi dữ liệu
+      List<WorkoutSchedule> workoutSchedules = querySnapshot.docs
+          .map((doc) => WorkoutSchedule.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
+      // Lọc và sắp xếp
+      List<WorkoutSchedule> filteredSchedules = workoutSchedules.where((doc) {
+        DateTime? time = parseDate(doc.day, doc.hour);
+        return time != null && !(time.isBefore(DateTime.now()) && doc.repeatInterval == 'no');
+      }).toList();
+      // Sắp xếp theo ngày tăng dần
+      filteredSchedules.sort((a, b) {
+        DateTime dateA = parseDate(a.day, a.hour)!;
+        DateTime dateB = parseDate(b.day, b.hour)!;
+        return dateA.compareTo(dateB);
+      });
 
+      return filteredSchedules.take(2).toList();
+    } catch (e) {
+      print("Lỗi khi lấy WorkoutSchedule: $e");
+      return [];
+    }
+  }
+
+  DateTime? parseDate(String day, String hour) {
+    try {
+      return DateFormat("dd/MM/yyyy h:mm a").parse("$day $hour");
+    } catch (e) {
+      print("Lỗi khi parse ngày giờ: $e");
+      return null;
+    }
+  }
+
+  Future<Map<String, List<FlSpot>>> generateWeeklyData({
+    required String uid,
+  }) async {
+    DateTime now = DateTime.now();
+    DateTime startOfWeek = now.subtract(Duration(days: now.weekday));
+    DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
+
+    Map<int, double> caloriesByDay = {for (int i = 1; i <= 7; i++) i: 0};
+    Map<int, double> durationByDay = {for (int i = 1; i <= 7; i++) i: 0};
+
+    QuerySnapshot workoutSnapshot = await FirebaseFirestore.instance
+        .collection('WorkoutHistory')
+        .where('uid', isEqualTo: uid)
+        .where('completedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfWeek))
+        .where('completedAt', isLessThanOrEqualTo: Timestamp.fromDate(endOfWeek))
+        .get();
+
+    for (var doc in workoutSnapshot.docs) {
+      final data = doc.data() as Map<String, dynamic>;
+      DateTime completedAt = DateTime.fromMillisecondsSinceEpoch(data['completedAt'].seconds * 1000);
+      int weekday = completedAt.weekday;
+
+      caloriesByDay[weekday] = caloriesByDay[weekday]! + (data['caloriesBurned'] ?? 0.0);
+      durationByDay[weekday] = durationByDay[weekday]! + (data['duration'] ?? 0.0);
+    }
+
+    List<FlSpot> calorieSpots = [];
+    List<FlSpot> durationSpots = [];
+    for (int i = 1; i <= 7; i++) {
+      calorieSpots.add(FlSpot(i.toDouble(), caloriesByDay[i]!));
+      durationSpots.add(FlSpot(i.toDouble(), durationByDay[i]!));
+    }
+
+    return {
+      'calories': calorieSpots,
+      'duration': durationSpots,
+    };
+  }
 }
 
 

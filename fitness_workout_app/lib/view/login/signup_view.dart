@@ -71,8 +71,6 @@ class _SignUpViewState extends State<SignUpView> {
       });
     }
   }
-
-
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery
@@ -89,6 +87,9 @@ class _SignUpViewState extends State<SignUpView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    SizedBox(
+                      height: media.width * 0.04,
+                    ),
                     Text(
                       "Hey there,",
                       style: TextStyle(color: TColor.gray, fontSize: 16),
@@ -101,7 +102,7 @@ class _SignUpViewState extends State<SignUpView> {
                           fontWeight: FontWeight.w700),
                     ),
                     SizedBox(
-                      height: media.width * 0.05,
+                      height: media.width * 0.1,
                     ),
                     RoundTextField(
                       hitText: "First Name",
@@ -210,98 +211,20 @@ class _SignUpViewState extends State<SignUpView> {
                         ),
                       ],
                     ),
-
                     SizedBox(
-                      height: media.width * 0.4,
+                      height: media.width * 0.8,
                     ),
                     RoundButton(
                       title: "Register",
                       onPressed: () {
                         if (!isCheck) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(
-                                'Bạn cần chấp nhận các điều khoản trước khi đăng ký')),
+                            const SnackBar(content: Text('Bạn cần chấp nhận các điều khoản trước khi đăng ký')),
                           );
                           return;
                         }
                         handleSignup();
                       },
-                    ),
-                    SizedBox(
-                      height: media.width * 0.04,
-                    ),
-                    Row(
-                      children: [
-                        Expanded(
-                            child: Container(
-                              height: 1,
-                              color: TColor.gray.withOpacity(0.5),
-                            )),
-                        Text(
-                          "  Or  ",
-                          style: TextStyle(color: TColor.black, fontSize: 12),
-                        ),
-                        Expanded(
-                            child: Container(
-                              height: 1,
-                              color: TColor.gray.withOpacity(0.5),
-                            )),
-                      ],
-                    ),
-                    SizedBox(
-                      height: media.width * 0.04,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: TColor.white,
-                              border: Border.all(
-                                width: 1,
-                                color: TColor.gray.withOpacity(0.4),
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Image.asset(
-                              "assets/img/google.png",
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                        ),
-
-                        SizedBox(
-                          width: media.width * 0.04,
-                        ),
-
-                        GestureDetector(
-                          onTap: () {},
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: TColor.white,
-                              border: Border.all(
-                                width: 1,
-                                color: TColor.gray.withOpacity(0.4),
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Image.asset(
-                              "assets/img/facebook.png",
-                              width: 20,
-                              height: 20,
-                            ),
-                          ),
-                        )
-                      ],
                     ),
                     SizedBox(
                       height: media.width * 0.04,

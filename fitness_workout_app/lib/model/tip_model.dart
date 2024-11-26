@@ -10,7 +10,7 @@ class Tip {
   });
 
   // Factory method để tạo một đối tượng Stips từ một document của Firestore
-  factory Tip.fromFirestore(Map<String, dynamic> data) {
+  factory Tip.fromJson(Map<String, dynamic> data) {
     return Tip(
       detail: data['detail'] ?? '',
       name: data['name'] ?? '',

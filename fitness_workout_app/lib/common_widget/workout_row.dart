@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness_workout_app/common/colo_extension.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:simple_animation_progress_bar/simple_animation_progress_bar.dart';
 
 import '../view/workout_tracker/ready_view.dart';
@@ -8,16 +10,33 @@ class WorkoutRow extends StatelessWidget {
   final Map wObj;
   const WorkoutRow({super.key, required this.wObj});
 
+  String formatCompletedAt(Timestamp timestamp) {
+    try {
+      // Chuyển đổi Timestamp thành DateTime
+      DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(
+          timestamp.seconds * 1000 + timestamp.nanoseconds ~/ 1000000);
+
+      // Định dạng DateTime theo yêu cầu
+      String formattedDate = DateFormat('dd/MM/yyyy').format(dateTime);
+      String formattedTime = DateFormat('hh:mm a').format(dateTime);
+
+      // Kết hợp ngày và giờ
+      return '$formattedDate at $formattedTime';
+    } catch (e) {
+      return 'Invalid timestamp';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
     return Container(
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
-        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+        padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 25),
         decoration: BoxDecoration(
             color: TColor.white,
             borderRadius: BorderRadius.circular(20),
-            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 2)]),
+            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)]),
         child: Row(
           children: [
             ClipRRect(
@@ -56,18 +75,25 @@ class WorkoutRow extends StatelessWidget {
                       wObj["name"].toString(),
                       style: TextStyle(
                           color: TColor.black,
-                          fontSize: 12),
+                          fontSize: 13),
                     ),
-
+                    const SizedBox(height: 1,),
                     Text(
                       "${ (wObj["index"] + 1).toString() }/${ wObj["exercisesArr"].length.toString() } Ex | "
                           "${ wObj["calo"].toString() } Calo Burned | ${wObj["time"].toStringAsFixed(2)} Mins",
                       style: TextStyle(
                         color: TColor.gray,
-                        fontSize: 10,),
+                        fontSize: 11,),
+                    ),
+                    const SizedBox(height: 1,),
+                    Text(
+                      formatCompletedAt(wObj["completedAt"]),
+                      style: TextStyle(
+                        color: TColor.gray,
+                        fontSize: 11,),
                     ),
 
-                    const SizedBox(height: 4,),
+                    const SizedBox(height: 5,),
 
                     SimpleAnimationProgressBar(
                       height: 15,

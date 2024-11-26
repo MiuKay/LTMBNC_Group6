@@ -1,15 +1,20 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fitness_workout_app/main.dart';
-import 'package:fitness_workout_app/view/home/notification_view.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+
+import '../view/workout_tracker/workour_detail_view.dart';
 
 class NotificationServices {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications = FlutterLocalNotificationsPlugin();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   final AndroidNotificationChannel _androidChannel = const AndroidNotificationChannel(
     'workout_channel',
@@ -26,46 +31,86 @@ class NotificationServices {
 
   Future<void> initNotifications() async {
     // Yêu cầu quyền từ người dùng
-    NotificationSettings settings = await _firebaseMessaging.requestPermission();
+    NotificationSettings settings = await _firebaseMessaging
+        .requestPermission();
     if (settings.authorizationStatus != AuthorizationStatus.authorized) {
       print('User declined or has not accepted permission');
       return;
     }
-
-    List<PendingNotificationRequest> pendingNotifications = await _localNotifications.pendingNotificationRequests();
-    for (var notification in pendingNotifications) {
-      print('ID: ${notification.id}, Title: ${notification.title}, Body: ${notification.body}');
-    }
-
+    setupMessageHandlers();
+    // List<PendingNotificationRequest> pendingNotifications = await _localNotifications.pendingNotificationRequests();
+    // for (var notification in pendingNotifications) {
+    //   print('ID: ${notification.id}, Title: ${notification.title}, Payload: ${notification.payload}');
+    // }
     await initLocalNotifications();
   }
 
   Future<void> initLocalNotifications() async {
     const DarwinInitializationSettings iOS = DarwinInitializationSettings();
-    const AndroidInitializationSettings android = AndroidInitializationSettings('@drawable/ic_launcher');
-    const InitializationSettings settings = InitializationSettings(android: android, iOS: iOS);
+    const AndroidInitializationSettings android = AndroidInitializationSettings(
+        '@drawable/icon_app');
+    const InitializationSettings settings = InitializationSettings(
+        android: android, iOS: iOS);
 
     await _localNotifications.initialize(
       settings,
       onDidReceiveNotificationResponse: (notificationResponse) {
         final payload = notificationResponse.payload;
         if (payload != null) {
-          final message = RemoteMessage.fromMap(jsonDecode(payload));
-          handleMessage(message);
+          try {
+            final data = jsonDecode(payload); // Parse JSON từ payload
+            navigatorKey.currentState?.push(
+              MaterialPageRoute(
+                builder: (context) => WorkoutDetailView(dObj: data),
+              ),
+            );
+          } catch (e) {
+            print("Error decoding payload: $e");
+          }
+        } else {
+          print("Payload is null");
         }
       },
     );
 
-    final platform = _localNotifications.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    final platform = _localNotifications.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
     await platform?.createNotificationChannel(_androidChannel);
   }
 
   void handleMessage(RemoteMessage? message) {
     if (message == null) return;
-    navigatorKey.currentState?.pushNamed(
-      NotificationView.route,
-      arguments: message,
-    );
+
+    final workoutData = message.data; // Lấy dữ liệu từ thông báo
+    if (workoutData.isNotEmpty) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => WorkoutDetailView(dObj: workoutData),
+        ),
+      );
+    }
+  }
+
+  void setupMessageHandlers() {
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      final data = message.data;
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => WorkoutDetailView(dObj: data),
+        ),
+      );
+    });
+
+    _firebaseMessaging.getInitialMessage().then((RemoteMessage? message) {
+      if (message != null) {
+        final data = message.data;
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(
+            builder: (context) => WorkoutDetailView(dObj: data),
+          ),
+        );
+      }
+    });
   }
 
   Future<String> scheduleWorkoutNotification({
@@ -73,6 +118,9 @@ class NotificationServices {
     required DateTime scheduledTime,
     required String workoutName,
     required String repeatInterval,
+    required String id_cate,
+    required String pic,
+    required String diff,
   }) async {
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'workout_channel',
@@ -91,15 +139,18 @@ class NotificationServices {
     // Nếu lặp lại là 'Everyday', kiểm tra xem thời gian đã qua chưa
     if (repeatInterval == 'Everyday') {
       if (newScheduledTime.isBefore(DateTime.now())) {
-        newScheduledTime = newScheduledTime.add(Duration(days: 1)); // Nếu thời gian đã qua, chuyển sang ngày hôm sau
+        newScheduledTime = newScheduledTime.add(Duration(
+            days: 1)); // Nếu thời gian đã qua, chuyển sang ngày hôm sau
       }
     }
     // Nếu lặp lại là các ngày trong tuần (Monday, Friday)
     else if (repeatInterval.contains(',')) {
-      newScheduledTime = _getNextWeekdayWithSameTime(DateTime.now(), repeatInterval, scheduledTime);
+      newScheduledTime = _getNextWeekdayWithSameTime(
+          DateTime.now(), repeatInterval, scheduledTime);
     }
 
-    final tz.TZDateTime scheduledTZDateTime = tz.TZDateTime.from(newScheduledTime, tz.local);
+    final tz.TZDateTime scheduledTZDateTime = tz.TZDateTime.from(
+        newScheduledTime, tz.local);
 
     //print('Scheduled Time: $scheduledTZDateTime');
 
@@ -111,8 +162,15 @@ class NotificationServices {
         'It\'s time for your workout: $workoutName',
         scheduledTZDateTime,
         platformDetails,
+        payload: jsonEncode({
+          'id': id_cate,
+          'title': workoutName,
+          'image': pic,
+          'difficulty': diff
+        }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
+            .wallClockTime,
       );
     } else if (repeatInterval == 'Everyday') {
       // Thông báo hàng ngày
@@ -122,8 +180,15 @@ class NotificationServices {
         'It\'s time for your daily workout: $workoutName',
         scheduledTZDateTime,
         platformDetails,
+        payload: jsonEncode({
+          'id': id_cate,
+          'title': workoutName,
+          'image': pic,
+          'difficulty': diff
+        }),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
+            .wallClockTime,
         matchDateTimeComponents: DateTimeComponents.time,
       );
     } else {
@@ -156,15 +221,23 @@ class NotificationServices {
             'It\'s time for your workout: $workoutName',
             currentScheduledTime,
             platformDetails,
+            payload: jsonEncode({
+              'id': id_cate,
+              'title': workoutName,
+              'image': pic,
+              'difficulty': diff
+            }),
             androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
+                .wallClockTime,
             matchDateTimeComponents: DateTimeComponents.time,
           );
           //print('Scheduled ${id.hashCode} notification for: $currentScheduledTime');
         }
 
         // Tính ngày tiếp theo trong tuần
-        currentScheduledTime = _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
+        currentScheduledTime =
+            _nextInstanceOfWeekday(currentScheduledTime, weekdaysSet);
       }
 
       // Kiểm tra nếu ngày lên lịch không nằm trong danh sách, thêm vào
@@ -176,8 +249,15 @@ class NotificationServices {
           'It\'s time for your workout: $workoutName',
           scheduledTZDateTime,
           platformDetails,
+          payload: jsonEncode({
+            'id': id_cate,
+            'title': workoutName,
+            'image': pic,
+            'difficulty': diff
+          }),
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.wallClockTime,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
+              .wallClockTime,
           matchDateTimeComponents: DateTimeComponents.time,
         );
         //print('Scheduled notification ${id.hashCode} for the initial day: $scheduledTZDateTime');
@@ -186,7 +266,8 @@ class NotificationServices {
     return id.hashCode.toString();
   }
 
-  DateTime _getNextWeekdayWithSameTime(DateTime currentDateTime, String repeatInterval, DateTime originalScheduledTime) {
+  DateTime _getNextWeekdayWithSameTime(DateTime currentDateTime,
+      String repeatInterval, DateTime originalScheduledTime) {
     // Chuyển đổi các ngày trong tuần từ chuỗi 'Monday,Friday' thành danh sách các ngày trong tuần
     List<String> daysOfWeek = repeatInterval.split(',');
     List<int> weekdaysSet = [];
@@ -199,17 +280,20 @@ class NotificationServices {
     }
 
     // Lưu giờ ban đầu để giữ nguyên
-    DateTime newScheduledTime = DateTime(currentDateTime.year, currentDateTime.month, currentDateTime.day,
+    DateTime newScheduledTime = DateTime(
+        currentDateTime.year, currentDateTime.month, currentDateTime.day,
         originalScheduledTime.hour, originalScheduledTime.minute);
 
     // Tìm ngày gần nhất trong tuần cho mỗi ngày yêu cầu
     while (!weekdaysSet.contains(newScheduledTime.weekday)) {
-      newScheduledTime = newScheduledTime.add(Duration(days: 1)); // Tìm ngày tiếp theo trong tuần
+      newScheduledTime = newScheduledTime.add(
+          Duration(days: 1)); // Tìm ngày tiếp theo trong tuần
     }
 
     // Kiểm tra xem thời gian có qua chưa, nếu có, chuyển sang ngày tiếp theo
     if (newScheduledTime.isBefore(currentDateTime)) {
-      newScheduledTime = newScheduledTime.add(Duration(days: 7)); // Nếu đã qua, chuyển sang tuần sau
+      newScheduledTime = newScheduledTime.add(
+          Duration(days: 7)); // Nếu đã qua, chuyển sang tuần sau
     }
 
     return newScheduledTime;
@@ -217,19 +301,28 @@ class NotificationServices {
 
   int _getWeekdayFromString(String day) {
     switch (day.toLowerCase()) {
-      case 'monday': return DateTime.monday;
-      case 'tuesday': return DateTime.tuesday;
-      case 'wednesday': return DateTime.wednesday;
-      case 'thursday': return DateTime.thursday;
-      case 'friday': return DateTime.friday;
-      case 'saturday': return DateTime.saturday;
-      case 'sunday': return DateTime.sunday;
-      default: return -1;
+      case 'monday':
+        return DateTime.monday;
+      case 'tuesday':
+        return DateTime.tuesday;
+      case 'wednesday':
+        return DateTime.wednesday;
+      case 'thursday':
+        return DateTime.thursday;
+      case 'friday':
+        return DateTime.friday;
+      case 'saturday':
+        return DateTime.saturday;
+      case 'sunday':
+        return DateTime.sunday;
+      default:
+        return -1;
     }
   }
 
 // Cập nhật để tránh lặp vô hạn và chỉ lấy các ngày trong tuần cần thông báo
-  tz.TZDateTime _nextInstanceOfWeekday(tz.TZDateTime dateTime, Set<int> weekdaysSet) {
+  tz.TZDateTime _nextInstanceOfWeekday(tz.TZDateTime dateTime,
+      Set<int> weekdaysSet) {
     tz.TZDateTime scheduledDate = tz.TZDateTime.from(dateTime, tz.local);
 
     do {
@@ -239,4 +332,87 @@ class NotificationServices {
     return scheduledDate;
   }
 
+  Future<void> cancelNotificationById(int id) async {
+    try {
+      await _localNotifications.cancel(id);
+      print("Notification with ID $id canceled successfully.");
+    } catch (e) {
+      print("Error canceling notification: $e");
+    }
+  }
+
+  Future<void> cancelAllNotifications() async {
+    await _localNotifications.cancelAll();
+  }
+
+  Future<String> loadAllNotifications() async {
+    String res = 'Có lỗi gì đó xảy ra';
+    try {
+      // Lấy lịch từ collection WorkoutSchedule của người dùng
+      var workoutScheduleSnapshot = await _firestore
+          .collection('WorkoutSchedule')
+          .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      // Duyệt qua các lịch và lên lịch lại thông báo
+      for (var workoutScheduleDoc in workoutScheduleSnapshot.docs) {
+        bool notify = workoutScheduleDoc['notify']; // Kiểm tra trường notify
+
+        // Nếu notify là false, bỏ qua và không làm gì
+        if (!notify) {
+          continue; // Bỏ qua tài liệu này và tiếp tục với tài liệu tiếp theo
+        }
+        var workoutId = workoutScheduleDoc['id']; // Lấy ID của lịch
+        var hour = workoutScheduleDoc['hour'];
+        var day = workoutScheduleDoc['day'];
+        var title = workoutScheduleDoc['name']; // Tiêu đề workout
+        var repeatInterval = workoutScheduleDoc['repeat_interval'];
+        var id_cate = workoutScheduleDoc['id_cate'];
+        var pic = workoutScheduleDoc['pic'];
+        var diff = workoutScheduleDoc['difficulty'];
+
+        final DateFormat dateFormat = DateFormat('dd/MM/yyyy');
+        final DateFormat hourFormat = DateFormat('hh:mm a');
+        DateTime selectedDay = dateFormat.parse(day);
+        DateTime selectedHour = hourFormat.parse(hour);
+
+        DateTime selectedDateTime = DateTime(
+          selectedDay.year,
+          selectedDay.month,
+          selectedDay.day,
+          selectedHour.hour,
+          selectedHour.minute,
+        );
+        // Kiểm tra nếu lịch là trong quá khứ và không phải lịch lặp lại
+        if (selectedDateTime.isBefore(DateTime.now()) &&
+            repeatInterval == 'no') {
+          // Nếu thời gian lên lịch đã qua và không phải lịch lặp lại, bỏ qua lịch này
+          continue;
+        }
+        // Lên lịch lại thông báo dựa trên thông tin từ Firestore
+        String id_notify = await scheduleWorkoutNotification(
+          id: workoutId,
+          scheduledTime: selectedDateTime,
+          workoutName: title,
+          repeatInterval: repeatInterval,
+          id_cate: id_cate,
+          pic: pic,
+          diff: diff,
+        );
+        await _firestore
+            .collection('WorkoutSchedule')
+            .doc(workoutScheduleDoc.id) // Lấy ID tài liệu để cập nhật
+            .update({
+          'id_notify': id_notify, // Cập nhật id_notify với giá trị đã lấy
+        });
+        print('Notification ID updated for workout ${workoutScheduleDoc.id}');
+      }
+      res = "success";
+    } catch (err) {
+      return err.toString();
+    }
+    return res;
+  }
 }
+
+

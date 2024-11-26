@@ -20,7 +20,7 @@ class Exercise {
   });
 
   // Tạo một phương thức để chuyển đổi từ Firestore document thành đối tượng Exercise
-  factory Exercise.fromFirestore(Map<String, dynamic> data) {
+  factory Exercise.fromJson(Map<String, dynamic> data) {
     return Exercise(
       calo: data['calo'] ?? 0,
       descriptions: data['descriptions'] ?? '',

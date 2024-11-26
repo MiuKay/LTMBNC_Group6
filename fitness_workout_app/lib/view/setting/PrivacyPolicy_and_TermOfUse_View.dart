@@ -9,7 +9,6 @@ class PrivacyPolicyandTermOfUseView extends StatefulWidget {
 }
 
 class _PrivacyPolicyandTermOfUseViewState extends State<PrivacyPolicyandTermOfUseView> {
-
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -45,13 +44,74 @@ class _PrivacyPolicyandTermOfUseViewState extends State<PrivacyPolicyandTermOfUs
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Privacy Policy and Term of Use",
+                  "Privacy Policy and Terms of Use",
                   style: TextStyle(
-                      color: TColor.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700),
+                    color: TColor.black,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Privacy Policy",
+                  style: TextStyle(
+                    color: TColor.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "1. We value your privacy and are committed to protecting your personal information. "
+                      "The data we collect is used solely for improving the user experience and providing personalized features in the app.",
+                  style: TextStyle(color: TColor.gray, fontSize: 16),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "2. Your data will not be shared with third parties without your consent, except as required by law.",
+                  style: TextStyle(color: TColor.gray, fontSize: 16),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Terms of Use",
+                  style: TextStyle(
+                    color: TColor.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "1. By using this app, you agree to adhere to all guidelines and rules outlined in this document.",
+                  style: TextStyle(color: TColor.gray, fontSize: 16),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "2. This app is designed to provide workout plans and exercise management. It is not a substitute for professional medical advice. "
+                      "Always consult a healthcare professional before beginning any fitness program.",
+                  style: TextStyle(color: TColor.gray, fontSize: 16),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "3. Users are prohibited from sharing their accounts or engaging in any unauthorized use of the application.",
+                  style: TextStyle(color: TColor.gray, fontSize: 16),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  "Contact Us",
+                  style: TextStyle(
+                    color: TColor.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "If you have any questions or concerns about this Privacy Policy or Terms of Use, please contact us at support@fitnessapp.com.",
+                  style: TextStyle(color: TColor.gray, fontSize: 16),
                 ),
               ],
             ),
@@ -61,4 +121,3 @@ class _PrivacyPolicyandTermOfUseViewState extends State<PrivacyPolicyandTermOfUs
     );
   }
 }
-

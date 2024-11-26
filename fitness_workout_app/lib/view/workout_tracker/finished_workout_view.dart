@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/colo_extension.dart';
 import '../../common_widget/round_button.dart';
+import '../../model/user_model.dart';
+import '../../services/auth.dart';
 import '../../services/workout_tracker.dart';
+import '../main_tab/main_tab_view.dart';
 import 'workout_tracker_view.dart';
 
 class FinishedWorkoutView extends StatefulWidget {
@@ -32,6 +36,32 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
     });
   }
 
+  void getUserInfo() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(
+          FirebaseAuth.instance.currentUser!.uid);
+
+      if (user != null) {
+        // Điều hướng đến HomeView với user
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainTabView(user: user, initialTab: 0),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var media = MediaQuery.of(context).size;
@@ -44,18 +74,15 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-
               const SizedBox(height: 20,),
               Image.asset(
                 "assets/img/complete_workout.png",
                 height: media.width * 0.8,
                 fit: BoxFit.fitHeight,
               ),
-
               const SizedBox(
                 height: 30,
               ),
-
               Text(
                 "Congratulations, You Have Finished Your Workout",
                 textAlign: TextAlign.center,
@@ -65,11 +92,9 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
                   fontWeight: FontWeight.w700,
                 ),
               ),
-
               const SizedBox(
                 height: 35,
               ),
-
               Container(
                 margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 5),
                 padding: const EdgeInsets.all(20),
@@ -142,24 +167,13 @@ class _FinishedWorkoutViewState extends State<FinishedWorkoutView> {
                   ],
                 ),
               ),
-
               const Spacer(),
               RoundButton(
                   title: "Back To Home",
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (
-                            context) => const WorkoutTrackerView(),
-                      ),
-                    );
-                  }),
-
+                  onPressed: getUserInfo),
               const SizedBox(
                 height: 50,
               ),
-
             ],
           ),
         ),

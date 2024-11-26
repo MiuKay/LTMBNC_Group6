@@ -30,6 +30,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
   bool isLoading = false;
   DateTime? parsedDay;
   DateTime? parsedHour;
+  bool isNotificationEnabled = true; // Ban đầu thông báo được bật
 
   @override
   void initState() {
@@ -42,6 +43,7 @@ class _EditScheduleViewState extends State<EditScheduleView> {
     hour = widget.schedule.hour;
     parsedDay = DateFormat("d/M/yyyy").parse(widget.schedule.day);
     parsedHour = DateFormat("h:mm a").parse(widget.schedule.hour);
+    isNotificationEnabled = widget.schedule.notify;
   }
 
   @override
@@ -65,7 +67,9 @@ class _EditScheduleViewState extends State<EditScheduleView> {
           hour: hour,
           name: selectedWorkout.text.trim(),
           repeatInterval: selectedRepetition.text.trim(),
-          uid: uid);
+          uid: uid,
+          notify: isNotificationEnabled,
+          id_notify: widget.schedule.id_notify);
       if (res == "success") {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Workout schedule updating successfully')));
@@ -187,14 +191,14 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 20,
+              SizedBox(
+                  height: media.width * 0.04,
               ),
               Text(
                 "Time",
                 style: TextStyle(
                     color: TColor.black,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500),
               ),
               SizedBox(
@@ -207,18 +211,18 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                   mode: CupertinoDatePickerMode.time,
                 ),
               ),
-              const SizedBox(
-                height: 24,
+              SizedBox(
+                  height: media.width * 0.06,
               ),
               Text(
                 "Details Workout",
                 style: TextStyle(
                     color: TColor.black,
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500),
               ),
-              const SizedBox(
-                height: 10,
+              SizedBox(
+                  height: media.width * 0.03,
               ),
               IconTitleNextRow(
                 icon: "assets/img/choose_workout.png",
@@ -239,8 +243,8 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                   }
                 },
               ),
-              const SizedBox(
-                height: 12,
+              SizedBox(
+                  height: media.width * 0.03
               ),
               InkWell(
                 onTap: () {
@@ -301,8 +305,8 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                 ),
               ),
 
-              const SizedBox(
-                height: 12,
+              SizedBox(
+                height: media.width * 0.03,
               ),
               RepetitionsRow(
                 icon: "assets/img/repetitions.png",
@@ -310,7 +314,31 @@ class _EditScheduleViewState extends State<EditScheduleView> {
                 color: TColor.lightGray,
                 repetitionController: selectedRepetition,
               ),
-
+              SizedBox(
+                height: media.width * 0.03,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Enable Notifications",
+                    style: TextStyle(
+                      color: TColor.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Switch(
+                    value: isNotificationEnabled,
+                    activeColor: TColor.primaryColor1,
+                    onChanged: (value) {
+                      setState(() {
+                        isNotificationEnabled = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
               Spacer(),
               RoundButton(
                   title: "Save",

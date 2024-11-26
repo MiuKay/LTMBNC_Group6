@@ -8,7 +8,10 @@ import 'package:flutter/material.dart';
 
 import '../../common_widget/exercises_row.dart';
 import '../../model/exercise_model.dart';
+import '../../model/user_model.dart';
+import '../../services/auth.dart';
 import '../../services/workout_tracker.dart';
+import '../main_tab/main_tab_view.dart';
 
 class WorkoutDetailView extends StatefulWidget {
   final Map dObj;
@@ -19,10 +22,9 @@ class WorkoutDetailView extends StatefulWidget {
 }
 
 class _WorkoutDetailViewState extends State<WorkoutDetailView> {
-  final TextEditingController selectedDifficulity = TextEditingController();
+  final TextEditingController selectedDifficulty = TextEditingController();
   final WorkoutService _workoutService = WorkoutService();
   List<Map<String, dynamic>> youArr = [];
-  String selectedDiffDefault = "Beginner";
   List<Exercise> exercisesArr = [];
   Map<String, String> listInfo = {};
 
@@ -30,7 +32,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
   void initState() {
     super.initState();
     _loadToolOfCategoryWorkout();
-    selectedDifficulity.text = selectedDiffDefault;
+    selectedDifficulty.text = widget.dObj["difficulty"];
     _loadExercises();
     _loadCaloAndTime();
   }
@@ -48,7 +50,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     String categoryId = widget.dObj["id"].toString();
     Map<String, String> list = await _workoutService.fetchTimeAndCalo(
       categoryId: categoryId,
-      difficulty: selectedDifficulity.text.trim(),
+      difficulty: selectedDifficulty.text.trim(),
     );
     setState(() {
       listInfo = list;
@@ -60,7 +62,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     List<Exercise> exercises = await _workoutService
         .fetchExercisesByCategoryAndDifficulty(
       categoryId: categoryId,
-      difficulty: selectedDifficulity.text.trim(),
+      difficulty: selectedDifficulty.text.trim(),
     );
     setState(() {
       exercisesArr = exercises;
@@ -83,7 +85,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                 ),
                 onTap: () {
                   setState(() {
-                    selectedDifficulity.text = difficulty;
+                    selectedDifficulty.text = difficulty;
                     _loadExercises();
                     _loadCaloAndTime();
                   });
@@ -97,13 +99,39 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
     );
   }
 
+  void getUserInfo() async {
+    try {
+      // Lấy thông tin người dùng
+      UserModel? user = await AuthService().getUserInfo(
+          FirebaseAuth.instance.currentUser!.uid);
+
+      if (user != null) {
+        // Điều hướng đến HomeView với user
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainTabView(user: user, initialTab: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Có lỗi xảy ra')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi xảy ra: $e')),
+      );
+    }
+  }
+
   void _createHistory() async {
     // Tạo một WorkoutHistory rỗng
     String historyId = await _workoutService.createEmptyWorkoutHistory(
       uid: FirebaseAuth.instance.currentUser!.uid,
       idCate: widget.dObj["id"].toString(),
       exercisesArr: exercisesArr,
-      difficulty: selectedDifficulity.text,
+      difficulty: selectedDifficulty.text,
     );
 
     // Chuyển sang trang ReadyView
@@ -286,7 +314,7 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                               SizedBox(
                                 width: 120,
                                 child: Text(
-                                  selectedDifficulity.text,
+                                  selectedDifficulty.text,
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
                                       color: TColor.gray, fontSize: 12),
@@ -319,10 +347,8 @@ class _WorkoutDetailViewState extends State<WorkoutDetailView> {
                           title: "Schedule Workout",
                           time: "Add to Schedule",
                           color: TColor.primaryColor2.withOpacity(0.3),
-                          onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (
-                                context) => const WorkoutScheduleView()));
-                          }),
+                          onPressed: getUserInfo
+                      ),
                       SizedBox(
                         height: media.width * 0.05,
                       ),
