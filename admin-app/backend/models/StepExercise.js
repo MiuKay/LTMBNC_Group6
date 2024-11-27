@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 // Định nghĩa schema cho StepExercise
 const stepExerciseSchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    name: { type: String, required: true, default: ""},
     step: { type: Number, required: true },
-    title: { type: String, required: true },
-    detail: { type: String, required: true },
+    title: { type: String, required: true, default: ""},
+    detail: { type: String, required: true , default: ""},
 });
 
 // Phương thức tĩnh để chuyển đổi từ JSON sang StepExercise

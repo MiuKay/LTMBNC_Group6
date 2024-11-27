@@ -6,4 +6,4 @@ const toolSchema = new mongoose.Schema({
   pic: { type: String }, 
 });
 
-module.exports = mongoose.model('Tools', toolSchema);
+module.exports = mongoose.model('Tool', toolSchema);

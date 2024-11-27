@@ -6,4 +6,4 @@ const tipSchema = new mongoose.Schema({
   pic: { type: String }, 
 });
 
-module.exports = mongoose.model('Tips', tipSchema);
+module.exports = mongoose.model('Tip', tipSchema);

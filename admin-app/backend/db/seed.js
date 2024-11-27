@@ -9,7 +9,7 @@ const WorkoutModel = require("../models/WorkoutModel");
 
 // Kết nối MongoDB
 mongoose
-    .connect("mongodb://localhost:27017/fitnessApp", {
+    .connect("mongodb://localhost:27017/FitnessWorkoutApp", {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })

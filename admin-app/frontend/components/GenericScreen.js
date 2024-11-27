@@ -152,7 +152,7 @@ const GenericScreen = ({
     const handleSave = async () => {
         const errors = {};
         fields.forEach(field => {
-            if (field.key !== 'uid') {
+            if (field.key !== 'uid' && field.key !== 'id') {
                 const error = validateField(field.key, formData[field.key]);
                 if (error) errors[field.key] = error;
             }
@@ -280,7 +280,6 @@ const GenericScreen = ({
                             buttons={[
                                 { value: 'male', label: 'Nam' },
                                 { value: 'female', label: 'Nữ' },
-                                { value: 'other', label: 'Khác' }
                             ]}
                             style={styles.segmentedButtons}
                         />
@@ -307,8 +306,12 @@ const GenericScreen = ({
                         {error && <Text style={styles.errorText}>{error}</Text>}
                     </View>
                 );
+            case 'time':
+            case 'rep' :
+            case 'calo':
             case 'weight':
             case 'height':
+            case 'step':
                 return (
                     <View key={field.key} style={styles.formField}>
                         <TextInput
@@ -375,6 +378,7 @@ const GenericScreen = ({
                             {error && <Text style={styles.errorText}>{error}</Text>}
                         </View>
                     );
+            case 'id':
             case 'uid':
                 return (
                     <View key={field.key} style={styles.formField}>

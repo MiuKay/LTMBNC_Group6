@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     uid: { 
         type: String, 
         default: function () {
-            return this._id.toString(); // Gán uid mặc định bằng ObjectID của `_id`
+            return this._id.toString(); 
         }
     },
     fname: { type: String, required: true },
@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
     otp: { type: String, default: "959724" },
     role: { type: String, default: "user" },
     activate: { type: Boolean, default: true },
+    password: { type: String, default: "123456" },
 });
 
 // Hàm tính tuổi từ ngày sinh
@@ -65,6 +66,6 @@ userSchema.statics.fromJson = function (json) {
 };
 
 // Tạo model
-const UserModel = mongoose.model("UserModel", userSchema);
+const UserModel = mongoose.model("User", userSchema);
 
 module.exports = UserModel;

@@ -6,7 +6,7 @@ const categoryWorkoutSchema = new mongoose.Schema({
     id: { type: String, required: true, default: function() { return this._id.toString(); } }, // Thêm trường id
     level: { type: [String], required: true, default: [] }, // Mảng các cấp độ
     name: { type: String, required: true, default: "" }, // Tên
-    pic: { type: String, default: "" }, // Hình ảnh (không yêu cầu)
+    pic: { type: String, default: "" }, 
 });
 
 // Phương thức tĩnh để chuyển đổi từ JSON (Firestore document) sang CategoryWorkout

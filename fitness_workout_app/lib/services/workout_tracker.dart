@@ -964,7 +964,7 @@ class WorkoutService {
     required String uid,
   }) async {
     DateTime now = DateTime.now();
-    DateTime startOfWeek = now.subtract(Duration(days: now.weekday));
+    DateTime startOfWeek = now.subtract(Duration(days: now.weekday-1));
     DateTime endOfWeek = startOfWeek.add(Duration(days: 6));
 
     Map<int, double> caloriesByDay = {for (int i = 1; i <= 7; i++) i: 0};

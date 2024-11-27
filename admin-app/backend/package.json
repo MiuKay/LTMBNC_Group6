@@ -11,9 +11,12 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
+    "firebase": "^11.0.2",
+    "firebase-admin": "^13.0.1",
     "http-errors": "~1.6.3",
     "mongoose": "^8.8.2",
     "morgan": "~1.9.1",
     "pug": "2.0.0-beta11"
   }
+
 }

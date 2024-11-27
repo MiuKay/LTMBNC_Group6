@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const exerciseSchema = new mongoose.Schema({
     calo: { type: Number, required: true, default: 0 },
     descriptions: { type: String, required: true, default: "" },
-    difficulty: { type: String, required: true, default: "" },
+    difficulty: { type: String, required: true, default: "Beginner" },
     name: { type: String, required: true, default: "" },
     pic: { type: String, default: "" },
     rep: { type: Number, required: true, default: 0 },

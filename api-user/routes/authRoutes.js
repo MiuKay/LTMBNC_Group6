@@ -64,9 +64,9 @@ router.post('/complete-profile', async (req, res) => {
   }
 });
 
-// Route lấy thông tin người dùng
-router.get('/getInfo', async (req, res) => {
-  const { uid } = req.body;
+// Đổi `/getInfo` thành `/getInfo/:uid`
+router.get('/getInfo/:uid', async (req, res) => {
+  const { uid } = req.params;  // Lấy UID từ URL params
   
   try {
     const user = await authService.getUserInfo(uid);
@@ -111,5 +111,66 @@ router.post('/update-level', async (req, res) => {
     res.status(500).json({ message: 'Error updating user level', error: error.message });
   }
 });
+
+router.post('/forget-password', async (req, res) => {
+  const { email, newPass, otp } = req.body;
+
+  try {
+    const result = await authService.forgetPassword(email, newPass, otp);
+    if (result === "success") {
+      res.status(200).json({ message: "Mật khẩu đã được đặt lại thành công" });
+    } else {
+      res.status(400).json({ message: result });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Có lỗi xảy ra", error: error.message });
+  }
+});
+
+router.post('/send-otp', async (req, res) => {
+  const { uid } = req.body;
+
+  try {
+    const result = await authService.sendOtpEmail(uid);
+    if (result === "success") {
+      res.status(200).json({ message: "OTP đã được gửi" });
+    } else {
+      res.status(400).json({ message: result });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Có lỗi xảy ra", error: error.message });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const result = await authService.sendOtpEmailResetPass(email);
+    if (result === "success") {
+      res.status(200).json({ message: "OTP đã được gửi" });
+    } else {
+      res.status(400).json({ message: result });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Có lỗi xảy ra", error: error.message });
+  }
+});
+
+router.post('/verify-otp', async (req, res) => {
+  const { uid, otp } = req.body;
+
+  try {
+    const result = await authService.verifyOtp(uid, otp);
+    if (result === "success") {
+      res.status(200).json({ message: "OTP đã được xác thực" });
+    } else {
+      res.status(400).json({ message: result });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Có lỗi xảy ra", error: error.message });
+  }
+});
+
 
 module.exports = router;

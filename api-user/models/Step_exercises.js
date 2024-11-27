@@ -7,4 +7,4 @@ const stepExerciseSchema = new mongoose.Schema({
   title: { type: String}, 
 });
 
-module.exports = mongoose.model('Step_exercies', stepExerciseSchema);
+module.exports = mongoose.model('stepexercise', stepExerciseSchema);

@@ -5,4 +5,4 @@ const cateWorkToolSchema = new mongoose.Schema({
   id_tool: { type: String, required: true }, 
 });
 
-module.exports = mongoose.model('CateWork_tool', cateWorkToolSchema);
+module.exports = mongoose.model('CateWorkTool', cateWorkToolSchema);
