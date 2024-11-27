@@ -14,8 +14,8 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch categories" });
     }
 });
+ 
 
-// Lấy chi tiết một CategoryWorkout
 router.get("/:id", async (req, res) => {
     try {
         const category = await CategoryWorkout.findById(req.params.id);
